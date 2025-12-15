@@ -1,9 +1,9 @@
 {
-  "title": "Project Documentation",
-  "url": "docs/docs/index.md",
-  "tags": ["docs", "overview", "info"],
+  "title": "API Reference",
+  "url": "docs/api/index.md",
+  "tags": ["west", "api", "reference"],
   "enabled": true,
-  "description": "Project overview and documentation index",
+  "description": "Browse the API documentation",
   "refreshInterval": 0,
   "allowInteraction": true
 }

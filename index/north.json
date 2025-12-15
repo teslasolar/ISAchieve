@@ -1,9 +1,9 @@
 {
-  "title": "Documentation Hub",
+  "title": "Project Overview",
   "url": "docs/index.html",
-  "tags": ["docs", "main", "github-pages"],
+  "tags": ["north", "docs", "overview"],
   "enabled": true,
-  "description": "Main documentation and project overview",
+  "description": "Welcome and quick start guide",
   "refreshInterval": 0,
   "allowInteraction": true
 }

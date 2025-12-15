@@ -1,9 +1,9 @@
 {
-  "title": "API Reference",
-  "url": "docs/api/index.md",
-  "tags": ["api", "reference", "docs"],
+  "title": "Code Examples",
+  "url": "examples/basic-usage.js",
+  "tags": ["east", "examples", "code"],
   "enabled": true,
-  "description": "API documentation and code references",
+  "description": "Live examples and demos",
   "refreshInterval": 0,
   "allowInteraction": true
 }

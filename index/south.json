@@ -1,9 +1,9 @@
 {
-  "title": "Getting Started Guide",
+  "title": "Quick Start",
   "url": "docs/docs/getting-started.md",
-  "tags": ["guide", "tutorial", "docs"],
+  "tags": ["south", "tutorial", "guide"],
   "enabled": true,
-  "description": "Quick start guide and tutorials",
+  "description": "Get started in minutes",
   "refreshInterval": 0,
   "allowInteraction": true
 }
