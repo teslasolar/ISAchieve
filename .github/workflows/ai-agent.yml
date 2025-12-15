@@ -1,0 +1,42 @@
+name: AI Agent Integration
+
+on:
+  workflow_dispatch:
+    inputs:
+      agent-task:
+        description: 'Task for the AI agent'
+        required: true
+        type: string
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday
+
+jobs:
+  agent-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup environment
+      run: |
+        echo "Setting up AI agent environment..."
+        mkdir -p logs/agents
+    
+    - name: Run AI agent task
+      env:
+        AGENT_TASK: ${{ github.event.inputs.agent-task || 'health-check' }}
+      run: |
+        echo "Executing agent task: $AGENT_TASK"
+        echo "Task executed at $(date)" >> logs/agents/execution.log
+    
+    - name: Upload agent logs
+      uses: actions/upload-artifact@v4
+      with:
+        name: agent-logs
+        path: logs/agents/
+        retention-days: 30
+    
+    - name: Report results
+      run: |
+        echo "Agent execution complete"
+        echo "Check artifacts for detailed logs"

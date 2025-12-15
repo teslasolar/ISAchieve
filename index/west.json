@@ -1,0 +1,9 @@
+{
+  "title": "Agent Metrics",
+  "url": "docs/docs/getting-started.md",
+  "tags": ["metrics", "monitoring", "live"],
+  "enabled": true,
+  "description": "Real-time agent performance metrics",
+  "refreshInterval": 0,
+  "allowInteraction": true
+}

@@ -1,0 +1,44 @@
+{
+  "name": "isachieve",
+  "version": "1.0.0",
+  "description": "Achievement System for Self-Building AI Agents",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src tests",
+    "lint:fix": "eslint src tests --fix",
+    "build": "echo 'Build step placeholder'",
+    "start": "node examples/basic-usage.js",
+    "dev": "node --watch examples/basic-usage.js"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "achievements",
+    "tracking",
+    "self-building",
+    "autonomous",
+    "metrics"
+  ],
+  "author": "teslasolar",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/teslasolar/ISAchieve.git"
+  },
+  "bugs": {
+    "url": "https://github.com/teslasolar/ISAchieve/issues"
+  },
+  "homepage": "https://teslasolar.github.io/ISAchieve",
+  "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

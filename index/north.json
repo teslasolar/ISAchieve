@@ -1,0 +1,9 @@
+{
+  "title": "Documentation Hub",
+  "url": "docs/index.html",
+  "tags": ["docs", "main", "github-pages"],
+  "enabled": true,
+  "description": "Main documentation and project overview",
+  "refreshInterval": 0,
+  "allowInteraction": true
+}

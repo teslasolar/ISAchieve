@@ -1,0 +1,9 @@
+{
+  "title": "API Reference",
+  "url": "docs/api/index.md",
+  "tags": ["api", "reference", "docs"],
+  "enabled": true,
+  "description": "API documentation and code references",
+  "refreshInterval": 0,
+  "allowInteraction": true
+}

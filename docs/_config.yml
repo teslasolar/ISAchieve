@@ -1,0 +1,48 @@
+# GitHub Pages Configuration for ISAchieve
+title: ISAchieve
+description: Achievement System for Self-Building AI Agents
+theme: jekyll-theme-cayman
+baseurl: "/ISAchieve"
+url: "https://teslasolar.github.io"
+
+# GitHub metadata
+github:
+  repository_url: https://github.com/teslasolar/ISAchieve
+  
+# Build settings
+markdown: kramdown
+highlighter: rouge
+
+# Collections
+collections:
+  docs:
+    output: true
+    permalink: /:collection/:path/
+  api:
+    output: true
+    permalink: /:collection/:path/
+
+# Navigation
+navigation:
+  - title: Home
+    url: /
+  - title: Documentation
+    url: /docs/
+  - title: API Reference
+    url: /api/
+  - title: GitHub
+    url: https://github.com/teslasolar/ISAchieve
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .gitignore

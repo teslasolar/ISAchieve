@@ -1,0 +1,1180 @@
+<!--
+================================================================================
+UDT: ISAchieve/Core/CubeLinux
+Version: 1.0.0
+Created: 2024-12-15
+Author: ISAchieve-System
+Modified: 2024-12-15 | ISAchieve-System | Initial creation
+Tags: #SCADA #ISA95 #ISA88 #ISA101 #3D-Viz #Achievement-System
+Dependencies: three.js@r128
+License: MIT
+================================================================================
+-->
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CubeLinux|ActiveSystems|ISAAchievements</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#000;overflow:hidden;font-family:monospace;color:#0f0}#c{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0}.panel{position:absolute;background:rgba(0,20,40,0.9);border:2px solid;border-radius:8px;padding:8px;font-size:10px;backdrop-filter:blur(5px);z-index:10}.terminal{background:rgba(0,0,0,0.9);color:#0f0;padding:5px;height:100px;overflow-y:auto;white-space:pre-wrap;font-size:8px;font-family:'Courier New',monospace}.achievement{background:rgba(40,20,0,0.9);border:1px solid #ff8800;margin:2px;padding:4px;border-radius:4px;font-size:8px}.achievement.unlocked{background:rgba(0,40,20,0.9);border-color:#00ff88}.component-active{background:rgba(0,30,30,0.8);margin:1px;padding:3px;border-left:3px solid;font-size:7px}.performance-meter{background:linear-gradient(90deg,#ff0000,#ffff00,#00ff00);height:8px;border-radius:4px}.isa-level{color:#ffff00;font-weight:bold}</style></head>
+<body><canvas id="c"></canvas>
+
+<div class="panel" style="top:10px;left:10px;border-color:#0f0;width=320px">
+<div style="color:#0f0;font-weight:bold;text-align:center">🏆 ISA ACHIEVEMENT SYSTEM</div>
+<div id="isa-status" class="isa-level"></div>
+<div id="achievements" style="max-height:160px;overflow-y:auto"></div>
+</div>
+
+<div class="panel" style="top:10px;right:10px;border-color:#0ff;width:450px">
+<div style="color:#0ff;font-weight:bold">💻 SYSTEM PERFORMANCE</div>
+<div id="system-metrics"></div>
+<div id="active-terminal" class="terminal"></div>
+<input type="text" id="cmd-input" style="width:100%;background:#000;color:#0ff;border:1px solid #0ff;padding:5px;font-family:monospace" placeholder="admin@isa-system:~# " onkeypress="if(event.key==='Enter'){CUBE.sendCommand(this.value);this.value=''}">
+</div>
+
+<div class="panel" style="bottom:10px;left:10px;border-color:#f0f;width:350px">
+<div style="color:#f0f;font-weight:bold">⚙️ ACTIVE COMPONENTS</div>
+<div id="active-components" style="max-height:180px;overflow-y:auto"></div>
+</div>
+
+<div class="panel" style="bottom:10px;right:10px;border-color:#ff0;width:380px">
+<div style="color:#ff0;font-weight:bold">📊 THROUGHPUT & EFFICIENCY</div>
+<div id="throughput-stats"></div>
+<div style="margin-top:5px;font-size:8px">
+<button onclick="CUBE.Workload.generateLoad()" style="background:#0ff;color:#000;border:0;padding:3px;margin:1px;font-size:8px">🚀 Generate Load</button>
+<button onclick="CUBE.Achievements.simulateGrowth()" style="background:#ff0;color:#000;border:0;padding:3px;margin:1px;font-size:8px">📈 Simulate Growth</button>
+<button onclick="CUBE.kamehamehaBlast()" style="background:#f0f;color:#000;border:0;padding:3px;margin:1px;font-size:8px">💥 POWER SURGE</button>
+</div>
+</div>
+
+<script>
+const CUBE={
+// Active system with ISA achievements and functional components
+$:(id)=>document.getElementById(id),
+state:{
+uptime:0,
+currentFace:0,
+lockedRotation:true,
+components:new Map(),
+dataFlows:new Map(),
+spatialGrid:new Map(),
+instanceCounter:0,
+componentCounter:0,
+flowCounter:0,
+communications:[],
+axisRotation:{x:0,y:0,z:0,target:{x:0,y:0,z:0}},
+autoBuild:{active:true,interval:6000},
+autoFlow:{active:true,intensity:1.0},
+// System performance metrics
+performance:{
+totalThroughput:0,
+averageLatency:0,
+systemEfficiency:0,
+uptime:100,
+errorRate:0,
+scalabilityIndex:0,
+redundancyLevel:0,
+securityScore:0
+},
+// ISA and architectural standards tracking
+standards:{
+currentLevel:0,
+points:0,
+nextLevelThreshold:100,
+compliance:{
+'ISA-95':0,  // Enterprise-Control Integration
+'ISA-88':0,  // Batch Control Systems
+'ISA-101':0, // Human Machine Interface
+'ISO-27001':0, // Security Management
+'TOGAF':0,   // Enterprise Architecture
+'ITIL':0,    // IT Service Management
+'DevOps':0,  // DevOps Maturity
+'Cloud':0    // Cloud Architecture
+}
+},
+// Resource pools for active processing
+resources:{
+cpu:{total:1000,used:0,efficiency:1.0},
+memory:{total:8192,used:0,efficiency:1.0},
+network:{total:10000,used:0,efficiency:1.0},
+storage:{total:50000,used:0,efficiency:1.0},
+// Processing queues
+activeJobs:0,
+queuedTasks:0,
+completedJobs:0,
+failedJobs:0
+}
+},
+
+// Enhanced component types with real functionality
+ComponentTypes:{
+database:{
+name:'Database',
+colors:[0x0088ff,0x0066cc,0x004499],
+shapes:['cylinder','box'],
+capabilities:['store','query','index','backup','replicate','partition'],
+processing:{
+baseCapacity:1000,
+currentLoad:0,
+queriesPerSecond:0,
+dataStored:0,
+indexEfficiency:1.0,
+replicationHealth:100
+},
+functions:{
+processQuery:(component,complexity=1)=>{
+const processingTime=complexity*10;
+component.processing.currentLoad+=complexity;
+component.processing.queriesPerSecond++;
+setTimeout(()=>{
+component.processing.currentLoad-=complexity;
+CUBE.SystemMetrics.recordTransaction('database',processingTime,true);
+},processingTime);
+return{success:true,time:processingTime,data:`result_${Math.random().toString(36)}`};
+},
+storeData:(component,size=1)=>{
+component.processing.dataStored+=size;
+CUBE.state.resources.storage.used+=size;
+CUBE.SystemMetrics.recordMetric('storage',size);
+return{stored:true,size,location:`partition_${Math.floor(Math.random()*8)}`};
+}
+},
+connections:['api','microservice','cache','worker'],
+isaContribution:{'ISA-95':10,'ISO-27001':5},
+autoWorkload:true
+},
+
+api:{
+name:'API Gateway',
+colors:[0xff8800,0xcc6600,0x994400],
+shapes:['pyramid','octahedron'],
+capabilities:['route','authenticate','rate-limit','transform','cache','load-balance'],
+processing:{
+baseCapacity:5000,
+currentLoad:0,
+requestsPerSecond:0,
+authSuccessRate:100,
+cacheHitRate:0,
+transformations:0
+},
+functions:{
+processRequest:(component,endpoint,complexity=1)=>{
+const processingTime=complexity*5;
+component.processing.currentLoad+=complexity;
+component.processing.requestsPerSecond++;
+
+// Simulate authentication
+const authSuccess=Math.random()>0.05;
+if(authSuccess){
+component.processing.authSuccessRate=
+(component.processing.authSuccessRate*0.95)+(100*0.05);
+setTimeout(()=>{
+component.processing.currentLoad-=complexity;
+CUBE.SystemMetrics.recordTransaction('api',processingTime,true);
+},processingTime);
+return{success:true,endpoint,authenticated:true,time:processingTime};
+}else{
+CUBE.SystemMetrics.recordTransaction('api',processingTime,false);
+return{success:false,error:'auth_failed'};
+}
+},
+routeRequest:(component,target)=>{
+component.processing.transformations++;
+return{routed:true,target,latency:Math.random()*50+10};
+}
+},
+connections:['database','microservice','frontend','cache'],
+isaContribution:{'ISA-101':15,'ITIL':10},
+autoWorkload:true
+},
+
+microservice:{
+name:'Microservice',
+colors:[0x88ff00,0x66cc00,0x449900],
+shapes:['box','dodecahedron'],
+capabilities:['process','compute','validate','notify','scale','recover'],
+processing:{
+baseCapacity:2000,
+currentLoad:0,
+jobsProcessed:0,
+businessLogicOps:0,
+validationsPassed:0,
+notifications:0
+},
+functions:{
+processBusinessLogic:(component,jobType,data)=>{
+const complexity=Math.random()*5+1;
+const processingTime=complexity*20;
+component.processing.currentLoad+=complexity;
+component.processing.businessLogicOps++;
+
+setTimeout(()=>{
+component.processing.currentLoad-=complexity;
+const success=Math.random()>0.02;
+component.processing.jobsProcessed++;
+if(success){
+component.processing.validationsPassed++;
+CUBE.SystemMetrics.recordTransaction('microservice',processingTime,true);
+}else{
+CUBE.SystemMetrics.recordTransaction('microservice',processingTime,false);
+}
+},processingTime);
+return{processed:true,jobType,result:data*Math.random(),time:processingTime};
+},
+sendNotification:(component,target,message)=>{
+component.processing.notifications++;
+return{sent:true,target,message,timestamp:Date.now()};
+}
+},
+connections:['database','api','queue','cache','worker'],
+isaContribution:{'ISA-88':20,'DevOps':15},
+autoWorkload:true
+},
+
+cache:{
+name:'Cache Layer',
+colors:[0xff0088,0xcc0066,0x990044],
+shapes:['sphere','icosahedron'],
+capabilities:['cache','expire','invalidate','warm','distribute','compress'],
+processing:{
+baseCapacity:10000,
+currentLoad:0,
+hitRate:0,
+missRate:0,
+evictions:0,
+compressionRatio:1.5
+},
+functions:{
+getCachedData:(component,key)=>{
+const hit=Math.random()>0.3;
+if(hit){
+component.processing.hitRate++;
+CUBE.SystemMetrics.recordTransaction('cache',1,true);
+return{hit:true,data:`cached_${key}`,time:1};
+}else{
+component.processing.missRate++;
+CUBE.SystemMetrics.recordTransaction('cache',50,false);
+return{hit:false,key,time:50};
+}
+},
+storeInCache:(component,key,data,ttl=3600)=>{
+const size=data.length||10;
+component.processing.currentLoad+=size;
+if(component.processing.currentLoad>component.processing.baseCapacity){
+component.processing.evictions++;
+component.processing.currentLoad=component.processing.baseCapacity*0.8;
+}
+return{cached:true,key,size,ttl};
+}
+},
+connections:['database','api','microservice'],
+isaContribution:{'ISA-95':8,'DevOps':12},
+autoWorkload:true
+},
+
+queue:{
+name:'Message Queue',
+colors:[0x8800ff,0x6600cc,0x440099],
+shapes:['torus','cylinder'],
+capabilities:['queue','publish','subscribe','route','persist','cluster'],
+processing:{
+baseCapacity:50000,
+currentLoad:0,
+messagesPerSecond:0,
+publishOps:0,
+subscribeOps:0,
+deadLetters:0
+},
+functions:{
+publishMessage:(component,topic,message)=>{
+const size=message.length||20;
+component.processing.currentLoad+=size;
+component.processing.publishOps++;
+component.processing.messagesPerSecond++;
+
+setTimeout(()=>{
+component.processing.currentLoad-=size;
+const delivered=Math.random()>0.01;
+if(!delivered)component.processing.deadLetters++;
+CUBE.SystemMetrics.recordTransaction('queue',5,delivered);
+},5);
+return{published:true,topic,messageId:`msg_${Date.now()}`,size};
+},
+consumeMessage:(component,subscription)=>{
+if(component.processing.currentLoad>10){
+component.processing.subscribeOps++;
+component.processing.currentLoad-=10;
+return{consumed:true,subscription,message:`payload_${Math.random()}`};
+}
+return{consumed:false,reason:'empty_queue'};
+}
+},
+connections:['microservice','api','worker'],
+isaContribution:{'ISA-88':15,'ITIL':8},
+autoWorkload:true
+},
+
+worker:{
+name:'Background Worker',
+colors:[0x00ff88,0x00cc66,0x009944],
+shapes:['tetrahedron','box'],
+capabilities:['process','schedule','batch','cleanup','retry','monitor'],
+processing:{
+baseCapacity:500,
+currentLoad:0,
+jobsCompleted:0,
+batchesProcessed:0,
+retryAttempts:0,
+cleanupOps:0
+},
+functions:{
+processJob:(component,jobData)=>{
+const complexity=Math.random()*10+5;
+const processingTime=complexity*100;
+component.processing.currentLoad+=complexity;
+
+setTimeout(()=>{
+component.processing.currentLoad-=complexity;
+const success=Math.random()>0.05;
+if(success){
+component.processing.jobsCompleted++;
+CUBE.SystemMetrics.recordTransaction('worker',processingTime,true);
+}else{
+component.processing.retryAttempts++;
+CUBE.SystemMetrics.recordTransaction('worker',processingTime,false);
+}
+},processingTime);
+return{processing:true,jobId:`job_${Date.now()}`,estimatedTime:processingTime};
+},
+scheduleBatch:(component,jobs)=>{
+component.processing.batchesProcessed++;
+return{scheduled:true,batchSize:jobs.length,eta:jobs.length*50};
+}
+},
+connections:['queue','database','api'],
+isaContribution:{'ISA-88':12,'ITIL':10},
+autoWorkload:true
+}
+},
+
+// ISA Achievement System
+Achievements:{
+levels:[
+{level:0,name:'Basic Setup',threshold:0,title:'🔧 Level 0: Basic Infrastructure'},
+{level:1,name:'ISA-101 HMI',threshold:100,title:'👥 Level 1: Human-Machine Interface'},
+{level:2,name:'ISA-88 Batch',threshold:300,title:'🔄 Level 2: Batch Control Systems'},
+{level:3,name:'ISA-95 Enterprise',threshold:600,title:'🏢 Level 3: Enterprise Integration'},
+{level:4,name:'Security Hardened',threshold:1000,title:'🛡️ Level 4: Security Compliance'},
+{level:5,name:'TOGAF Architect',threshold:1500,title:'🏗️ Level 5: Enterprise Architecture'},
+{level:6,name:'DevOps Master',threshold:2200,title:'🚀 Level 6: DevOps Excellence'},
+{level:7,name:'Cloud Native',threshold:3000,title:'☁️ Level 7: Cloud Architecture'},
+{level:8,name:'Self-Healing',threshold:4000,title:'🔄 Level 8: Autonomous Systems'},
+{level:9,name:'AI-Optimized',threshold:5500,title:'🧠 Level 9: AI-Driven Operations'},
+{level:10,name:'Quantum Ready',threshold:7500,title:'⚛️ Level 10: Quantum Computing Ready'}
+],
+
+achievements:{
+'first_database':{name:'First Database',desc:'Deploy your first database',points:10,unlocked:false},
+'api_gateway':{name:'API Gateway',desc:'Establish API gateway',points:15,unlocked:false},
+'microservice_mesh':{name:'Service Mesh',desc:'Deploy 5+ microservices',points:25,unlocked:false},
+'cache_layer':{name:'Caching Layer',desc:'Implement caching',points:20,unlocked:false},
+'message_queue':{name:'Message Queue',desc:'Setup async messaging',points:20,unlocked:false},
+'worker_pool':{name:'Worker Pool',desc:'Background processing active',points:15,unlocked:false},
+'data_flow_active':{name:'Data Flows',desc:'Active data flows between components',points:30,unlocked:false},
+'high_throughput':{name:'High Throughput',desc:'Process 1000+ transactions',points:40,unlocked:false},
+'low_latency':{name:'Low Latency',desc:'Average latency <50ms',points:35,unlocked:false},
+'high_availability':{name:'High Availability',desc:'99.9% uptime achieved',points:50,unlocked:false},
+'auto_scaling':{name:'Auto Scaling',desc:'System auto-scales under load',points:45,unlocked:false},
+'fault_tolerance':{name:'Fault Tolerance',desc:'Survive component failures',points:60,unlocked:false},
+'security_hardened':{name:'Security Hardened',desc:'Full security compliance',points:55,unlocked:false},
+'enterprise_grade':{name:'Enterprise Grade',desc:'All ISA standards met',points:100,unlocked:false}
+},
+
+check:()=>{
+const metrics=CUBE.state.performance;
+const resources=CUBE.state.resources;
+const achievements=CUBE.Achievements.achievements;
+
+// Check various achievements
+if(CUBE.getComponentsByType('database').length>=1 && !achievements.first_database.unlocked){
+CUBE.Achievements.unlock('first_database');
+}
+if(CUBE.getComponentsByType('api').length>=1 && !achievements.api_gateway.unlocked){
+CUBE.Achievements.unlock('api_gateway');
+}
+if(CUBE.getComponentsByType('microservice').length>=5 && !achievements.microservice_mesh.unlocked){
+CUBE.Achievements.unlock('microservice_mesh');
+}
+if(CUBE.getComponentsByType('cache').length>=1 && !achievements.cache_layer.unlocked){
+CUBE.Achievements.unlock('cache_layer');
+}
+if(CUBE.getComponentsByType('queue').length>=1 && !achievements.message_queue.unlocked){
+CUBE.Achievements.unlock('message_queue');
+}
+if(CUBE.getComponentsByType('worker').length>=1 && !achievements.worker_pool.unlocked){
+CUBE.Achievements.unlock('worker_pool');
+}
+if(CUBE.state.dataFlows.size>=3 && !achievements.data_flow_active.unlocked){
+CUBE.Achievements.unlock('data_flow_active');
+}
+if(resources.completedJobs>=1000 && !achievements.high_throughput.unlocked){
+CUBE.Achievements.unlock('high_throughput');
+}
+if(metrics.averageLatency<50 && metrics.averageLatency>0 && !achievements.low_latency.unlocked){
+CUBE.Achievements.unlock('low_latency');
+}
+if(metrics.uptime>=99.9 && !achievements.high_availability.unlocked){
+CUBE.Achievements.unlock('high_availability');
+}
+if(metrics.systemEfficiency>=85 && !achievements.auto_scaling.unlocked){
+CUBE.Achievements.unlock('auto_scaling');
+}
+if(metrics.errorRate<0.1 && resources.completedJobs>500 && !achievements.fault_tolerance.unlocked){
+CUBE.Achievements.unlock('fault_tolerance');
+}
+if(metrics.securityScore>=90 && !achievements.security_hardened.unlocked){
+CUBE.Achievements.unlock('security_hardened');
+}
+
+// Check for level progression
+const currentLevel=CUBE.state.standards.currentLevel;
+const nextLevel=CUBE.Achievements.levels[currentLevel+1];
+if(nextLevel && CUBE.state.standards.points>=nextLevel.threshold){
+CUBE.Achievements.levelUp();
+}
+},
+
+unlock:(achievementId)=>{
+const achievement=CUBE.Achievements.achievements[achievementId];
+if(achievement && !achievement.unlocked){
+achievement.unlocked=true;
+CUBE.state.standards.points+=achievement.points;
+CUBE.logCommunication(`🏆 Achievement Unlocked: ${achievement.name} (+${achievement.points} points)`);
+}
+},
+
+levelUp:()=>{
+CUBE.state.standards.currentLevel++;
+const level=CUBE.Achievements.levels[CUBE.state.standards.currentLevel];
+if(level){
+CUBE.logCommunication(`📈 LEVEL UP! ${level.title}`);
+// Grant level bonuses
+CUBE.state.performance.systemEfficiency+=5;
+CUBE.state.performance.securityScore+=10;
+}
+},
+
+simulateGrowth:()=>{
+// Simulate rapid system growth for testing
+for(let i=0;i<10;i++){
+const types=Object.keys(CUBE.ComponentTypes);
+const type=types[Math.floor(Math.random()*types.length)];
+const agentId=Math.floor(Math.random()*6);
+CUBE.AutoBuild.createComponent(type,agentId);
+}
+CUBE.state.resources.completedJobs+=500;
+CUBE.logCommunication('📈 Simulated rapid system growth');
+}
+},
+
+// System metrics and monitoring
+SystemMetrics:{
+transactionHistory:[],
+lastMetricUpdate:0,
+
+recordTransaction:(componentType,duration,success)=>{
+const transaction={
+type:componentType,
+duration,
+success,
+timestamp:Date.now()
+};
+CUBE.SystemMetrics.transactionHistory.push(transaction);
+if(CUBE.SystemMetrics.transactionHistory.length>1000){
+CUBE.SystemMetrics.transactionHistory.shift();
+}
+
+// Update resources
+if(success){
+CUBE.state.resources.completedJobs++;
+}else{
+CUBE.state.resources.failedJobs++;
+}
+},
+
+recordMetric:(metricType,value)=>{
+switch(metricType){
+case 'storage':
+CUBE.state.resources.storage.used+=value;
+break;
+case 'cpu':
+CUBE.state.resources.cpu.used+=value;
+break;
+case 'memory':
+CUBE.state.resources.memory.used+=value;
+break;
+case 'network':
+CUBE.state.resources.network.used+=value;
+break;
+}
+},
+
+calculateMetrics:()=>{
+const now=Date.now();
+const recent=CUBE.SystemMetrics.transactionHistory.filter(t=>now-t.timestamp<60000);
+
+if(recent.length>0){
+const successful=recent.filter(t=>t.success);
+const avgLatency=recent.reduce((sum,t)=>sum+t.duration,0)/recent.length;
+const successRate=(successful.length/recent.length)*100;
+const throughput=recent.length/60; // per second
+
+CUBE.state.performance.averageLatency=avgLatency;
+CUBE.state.performance.totalThroughput=throughput;
+CUBE.state.performance.errorRate=100-successRate;
+}
+
+// Calculate system efficiency
+const totalCapacity=Object.values(CUBE.state.resources).reduce((sum,r)=>{
+return sum+(r.total||0);
+},0);
+const totalUsed=Object.values(CUBE.state.resources).reduce((sum,r)=>{
+return sum+(r.used||0);
+},0);
+CUBE.state.performance.systemEfficiency=totalCapacity>0?(totalUsed/totalCapacity)*100:0;
+
+// Update ISA compliance scores
+CUBE.SystemMetrics.updateISACompliance();
+},
+
+updateISACompliance:()=>{
+const components=Array.from(CUBE.state.components.values());
+const standards=CUBE.state.standards.compliance;
+
+// Reset scores
+Object.keys(standards).forEach(key=>standards[key]=0);
+
+// Calculate based on active components
+components.forEach(component=>{
+if(component.spec.isaContribution){
+Object.entries(component.spec.isaContribution).forEach(([standard,points])=>{
+standards[standard]+=points;
+});
+}
+});
+
+// Calculate security score based on component diversity and health
+const uniqueTypes=new Set(components.map(c=>c.type));
+CUBE.state.performance.securityScore=Math.min(100,uniqueTypes.size*15+
+(CUBE.state.performance.uptime-95)*2);
+}
+},
+
+// Workload generation for active processing
+Workload:{
+generateLoad:()=>{
+const components=Array.from(CUBE.state.components.values());
+const activeComponents=components.filter(c=>c.spec.autoWorkload);
+
+activeComponents.forEach(component=>{
+const functions=component.spec.functions;
+if(functions){
+// Generate appropriate workload for each component type
+switch(component.type){
+case 'database':
+for(let i=0;i<5;i++){
+functions.processQuery(component,Math.random()*3+1);
+functions.storeData(component,Math.random()*100+10);
+}
+break;
+case 'api':
+for(let i=0;i<10;i++){
+functions.processRequest(component,`/api/v1/endpoint${i}`,Math.random()*2+1);
+}
+break;
+case 'microservice':
+for(let i=0;i<3;i++){
+functions.processBusinessLogic(component,'business_rule',Math.random()*100);
+}
+break;
+case 'cache':
+for(let i=0;i<8;i++){
+functions.getCachedData(component,`key_${i}`);
+}
+break;
+case 'queue':
+for(let i=0;i<6;i++){
+functions.publishMessage(component,'events',`message_${Date.now()}_${i}`);
+functions.consumeMessage(component,'subscription_1');
+}
+break;
+case 'worker':
+for(let i=0;i<2;i++){
+functions.processJob(component,{task:'background_job',data:Math.random()*1000});
+}
+break;
+}
+}
+});
+
+CUBE.logCommunication(`🚀 Generated workload for ${activeComponents.length} components`);
+},
+
+autoGenerate:()=>{
+if(Math.random()>0.7){
+CUBE.Workload.generateLoad();
+}
+}
+},
+
+// Enhanced 3D world with active component visualization
+World:{
+scene:null,camera:null,renderer:null,cube:null,faceMaterials:[],textCanvases:[],
+
+init:()=>{
+CUBE.World.scene=new THREE.Scene();
+CUBE.World.camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,1000);
+CUBE.World.renderer=new THREE.WebGLRenderer({canvas:CUBE.$('c'),alpha:true,antialias:true});
+CUBE.World.renderer.setSize(innerWidth,innerHeight);
+CUBE.World.renderer.setClearColor(0x000011,1);
+CUBE.World.renderer.shadowMap.enabled=true;
+CUBE.World.renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+
+CUBE.World.camera.position.set(100,80,100);
+CUBE.World.camera.lookAt(0,0,0);
+
+// Enhanced lighting
+const ambientLight=new THREE.AmbientLight(0x404040,0.6);
+CUBE.World.scene.add(ambientLight);
+
+const keyLight=new THREE.DirectionalLight(0xffffff,0.8);
+keyLight.position.set(50,100,50);
+keyLight.castShadow=true;
+keyLight.shadow.mapSize.width=2048;
+keyLight.shadow.mapSize.height=2048;
+CUBE.World.scene.add(keyLight);
+
+// Performance indicator lights
+const perfLights=[
+{color:0x00ff88,pos:[150,100,0]}, // Success
+{color:0xff4400,pos:[-150,100,0]}, // Errors
+{color:0x0088ff,pos:[0,100,150]}, // Load
+{color:0xffff00,pos:[0,100,-150]} // Efficiency
+];
+perfLights.forEach(light=>{
+const pointLight=new THREE.PointLight(light.color,0.5,300);
+pointLight.position.set(...light.pos);
+CUBE.World.scene.add(pointLight);
+});
+
+CUBE.World.createAxisReference();
+CUBE.World.createAgentCube();
+CUBE.World.animate();
+},
+
+createAxisReference:()=>{
+const axisHelper=new THREE.AxesHelper(40);
+CUBE.World.scene.add(axisHelper);
+
+const grid=new THREE.GridHelper(300,60,0x333333,0x111111);
+grid.position.y=-40;
+CUBE.World.scene.add(grid);
+
+// Performance zones
+const zones=[
+{name:'HIGH PERF',pos:[0,0,60],color:0x00ff88},
+{name:'PROCESSING',pos:[60,0,0],color:0x0088ff},
+{name:'STORAGE',pos:[-60,0,0],color:0xff8800},
+{name:'COMPUTE',pos:[0,0,-60],color:0xff00ff}
+];
+
+zones.forEach(zone=>{
+const sprite=CUBE.World.createTextSprite(zone.name,zone.color);
+sprite.position.set(...zone.pos);
+sprite.scale.multiplyScalar(1.5);
+CUBE.World.scene.add(sprite);
+});
+},
+
+createAgentCube:()=>{
+const cubeSize=30;
+const geometry=new THREE.BoxGeometry(cubeSize,cubeSize,cubeSize);
+
+CUBE.World.faceMaterials=[];
+CUBE.World.textCanvases=[];
+
+const faceOrder=[0,2,4,5,1,3];
+
+faceOrder.forEach((agentIndex,faceIndex)=>{
+const agent=CUBE.agents[agentIndex];
+const canvas=document.createElement('canvas');
+canvas.width=512;
+canvas.height=512;
+const context=canvas.getContext('2d');
+
+CUBE.World.updateFaceCanvas(context,agent,agentIndex);
+
+const texture=new THREE.CanvasTexture(canvas);
+const material=new THREE.MeshPhongMaterial({
+map:texture,
+transparent:true,
+opacity:0.9,
+emissive:agent.color,
+emissiveIntensity:0.2
+});
+
+CUBE.World.faceMaterials.push(material);
+CUBE.World.textCanvases.push({canvas,context,agent,agentIndex});
+});
+
+CUBE.World.cube=new THREE.Mesh(geometry,CUBE.World.faceMaterials);
+CUBE.World.cube.position.set(0,0,0);
+CUBE.World.scene.add(CUBE.World.cube);
+
+const wireframe=new THREE.EdgesGeometry(geometry);
+const wireframeMaterial=new THREE.LineBasicMaterial({color:0xffffff,opacity:0.3,transparent:true});
+const wireframeMesh=new THREE.LineSegments(wireframe,wireframeMaterial);
+CUBE.World.cube.add(wireframeMesh);
+},
+
+updateFaceCanvas:(context,agent,agentIndex)=>{
+const bgColor='#000022';
+context.fillStyle=bgColor;
+context.fillRect(0,0,512,512);
+
+// Performance header
+const efficiency=CUBE.state.performance.systemEfficiency;
+const headerColor=efficiency>80?'#00ff88':efficiency>50?'#ffff00':'#ff4400';
+context.fillStyle=headerColor;
+context.fillRect(0,0,512,50);
+
+context.fillStyle='#000000';
+context.font='bold 16px Courier New';
+context.textAlign='center';
+context.fillText(`${agent.name} ACTIVE`,256,30);
+
+// Agent performance metrics
+context.fillStyle=`#${agent.color.toString(16).padStart(6,'0')}`;
+context.font='10px Courier New';
+context.textAlign='left';
+
+const myComponents=Array.from(CUBE.state.components.values()).filter(c=>c.ownerId===agentIndex);
+const totalThroughput=myComponents.reduce((sum,c)=>sum+(c.processing?.requestsPerSecond||0),0);
+
+context.fillText(`Active Components: ${myComponents.length}`,10,70);
+context.fillText(`Throughput: ${totalThroughput.toFixed(1)}/sec`,10,90);
+context.fillText(`Specialty: ${agent.specialty}`,10,110);
+
+// Component status
+context.fillStyle='#ffffff';
+context.font='9px Courier New';
+context.fillText('Component Status:',10,140);
+
+myComponents.slice(0,12).forEach((component,index)=>{
+const y=160+(index*25);
+const load=component.processing?.currentLoad||0;
+const capacity=component.processing?.baseCapacity||1;
+const utilization=Math.min(100,(load/capacity)*100);
+
+// Component name
+context.fillStyle=`#${component.spec.colors[0].toString(16).padStart(6,'0')}`;
+context.fillText(component.id.substring(0,15),10,y);
+
+// Utilization bar
+const barWidth=100;
+const barHeight=8;
+context.fillStyle='#333333';
+context.fillRect(10,y+5,barWidth,barHeight);
+context.fillStyle=utilization>80?'#ff4400':utilization>50?'#ffff00':'#00ff88';
+context.fillRect(10,y+5,(utilization/100)*barWidth,barHeight);
+
+// Metrics
+context.fillStyle='#cccccc';
+context.font='8px Courier New';
+const metrics=component.processing;
+if(metrics){
+context.fillText(`Load:${utilization.toFixed(0)}% TPS:${(metrics.requestsPerSecond||metrics.queriesPerSecond||metrics.messagesPerSecond||0).toFixed(1)}`,120,y+10);
+}
+});
+
+// ISA compliance
+context.fillStyle='#ffff00';
+context.font='10px Courier New';
+context.fillText('ISA Compliance:',10,450);
+context.fillStyle='#ffffff';
+context.font='8px Courier New';
+const standards=CUBE.state.standards.compliance;
+let yPos=470;
+Object.entries(standards).slice(0,4).forEach(([standard,score])=>{
+context.fillText(`${standard}: ${score}`,10,yPos);
+yPos+=12;
+});
+},
+
+createTextSprite:(text,color)=>{
+const canvas=document.createElement('canvas');
+const context=canvas.getContext('2d');
+canvas.width=256;
+canvas.height=64;
+
+context.fillStyle='rgba(0,0,0,0.8)';
+context.fillRect(0,0,256,64);
+
+context.font='bold 12px Arial';
+context.fillStyle=`#${color.toString(16).padStart(6,'0')}`;
+context.textAlign='center';
+context.textBaseline='middle';
+
+const lines=text.split('\\n');
+lines.forEach((line,index)=>{
+context.fillText(line,128,32+(index-lines.length/2+0.5)*16);
+});
+
+const texture=new THREE.CanvasTexture(canvas);
+const material=new THREE.SpriteMaterial({map:texture,transparent:true});
+const sprite=new THREE.Sprite(material);
+sprite.scale.set(15,4,1);
+
+return sprite;
+},
+
+createComponent:(type,position,ownerId)=>{
+const spec=CUBE.ComponentTypes[type];
+if(!spec)return null;
+
+const componentId=`${type}_${++CUBE.state.componentCounter}`;
+const color=spec.colors[Math.floor(Math.random()*spec.colors.length)];
+
+const geometry=CUBE.AutoBuild.createGeometry(spec.shapes[Math.floor(Math.random()*spec.shapes.length)],spec.size||[8,8,8]);
+const material=new THREE.MeshPhongMaterial({
+color:color,
+emissive:color,
+emissiveIntensity:0.4,
+metalness:0.7,
+roughness:0.3
+});
+
+const mesh=new THREE.Mesh(geometry,material);
+mesh.position.set(...position);
+mesh.castShadow=true;
+mesh.receiveShadow=true;
+CUBE.World.scene.add(mesh);
+
+// Performance indicator rings
+const ringGeometry=new THREE.RingGeometry(6,8,16);
+const ringMaterial=new THREE.MeshBasicMaterial({
+color:0x00ff88,
+transparent:true,
+opacity:0.6,
+side:THREE.DoubleSide
+});
+const performanceRing=new THREE.Mesh(ringGeometry,ringMaterial);
+performanceRing.position.set(...position);
+performanceRing.position.y+=10;
+performanceRing.rotation.x=-Math.PI/2;
+CUBE.World.scene.add(performanceRing);
+
+const labelSprite=CUBE.World.createTextSprite(`${spec.name}\\n${componentId.split('_')[1]}`,color);
+labelSprite.position.set(position[0],position[1]+12,position[2]);
+CUBE.World.scene.add(labelSprite);
+
+const component={
+id:componentId,
+type,
+spec,
+position:[...position],
+mesh,
+performanceRing,
+labelSprite,
+ownerId,
+created:Date.now(),
+status:'active',
+processing:JSON.parse(JSON.stringify(spec.processing)),
+connections:[],
+lastActivity:Date.now()
+};
+
+CUBE.state.components.set(componentId,component);
+CUBE.agents[ownerId].instances.push(componentId);
+
+const ownerName=CUBE.agents[ownerId].name;
+CUBE.agents[ownerId].addLog(`Built active ${spec.name}: ${componentId}`);
+CUBE.logCommunication(`${ownerName} deployed ${spec.name} ${componentId}`);
+
+return component;
+},
+
+animate:()=>{
+requestAnimationFrame(CUBE.World.animate);
+const time=Date.now()*0.001;
+
+// Animate cube
+if(CUBE.World.cube){
+['x','y','z'].forEach(axis=>{
+CUBE.state.axisRotation[axis]+=(CUBE.state.axisRotation.target[axis]-CUBE.state.axisRotation[axis])*0.06;
+});
+
+CUBE.World.cube.rotation.x=CUBE.state.axisRotation.x;
+CUBE.World.cube.rotation.y=CUBE.state.axisRotation.y;
+CUBE.World.cube.rotation.z=CUBE.state.axisRotation.z;
+CUBE.World.cube.position.y=Math.sin(time*0.3)*3;
+}
+
+// Animate active components with performance indicators
+CUBE.state.components.forEach(component=>{
+if(component.mesh){
+const load=component.processing?.currentLoad||0;
+const capacity=component.processing?.baseCapacity||1;
+const utilization=Math.min(1,load/capacity);
+
+// Rotation speed based on activity
+const rotationSpeed=0.01+(utilization*0.05);
+component.mesh.rotation.y+=rotationSpeed;
+component.mesh.rotation.x+=rotationSpeed*0.5;
+
+// Pulse intensity based on load
+const pulse=Math.sin(time*3)*0.3+0.7;
+component.mesh.material.emissiveIntensity=0.3+(utilization*0.4)*pulse;
+
+// Performance ring color and animation
+if(component.performanceRing){
+const healthColor=utilization<0.7?0x00ff88:utilization<0.9?0xffff00:0xff4400;
+component.performanceRing.material.color.setHex(healthColor);
+component.performanceRing.rotation.z+=0.02;
+component.performanceRing.material.opacity=0.4+(utilization*0.4);
+}
+}
+});
+
+// Dynamic camera with performance-based movement
+const perfModifier=CUBE.state.performance.systemEfficiency/100;
+const radius=120-(perfModifier*20);
+CUBE.World.camera.position.x=Math.cos(time*0.02)*radius;
+CUBE.World.camera.position.z=Math.sin(time*0.02)*radius;
+CUBE.World.camera.position.y=80+Math.sin(time*0.04)*30*perfModifier;
+CUBE.World.camera.lookAt(0,10,0);
+
+CUBE.World.renderer.render(CUBE.World.scene,CUBE.World.camera);
+}
+},
+
+// Auto building system with enhanced logic
+AutoBuild:{
+createComponent:(type,ownerId)=>{
+const position=CUBE.Spatial.findSafePosition([8,8,8]);
+return CUBE.World.createComponent(type,position,ownerId);
+},
+
+createGeometry:(shape,size)=>{
+const[w,h,d]=size;
+switch(shape){
+case 'cylinder':return new THREE.CylinderGeometry(w/2,d/2,h,16);
+case 'pyramid':return new THREE.ConeGeometry(w/2,h,8);
+case 'octahedron':return new THREE.OctahedronGeometry(w/2);
+case 'dodecahedron':return new THREE.DodecahedronGeometry(w/2);
+case 'sphere':return new THREE.SphereGeometry(w/2,16,12);
+case 'icosahedron':return new THREE.IcosahedronGeometry(w/2);
+case 'torus':return new THREE.TorusGeometry(w/2,d/4,12,24);
+case 'tetrahedron':return new THREE.TetrahedronGeometry(w/2);
+case 'plane':return new THREE.PlaneGeometry(w,d);
+default:return new THREE.BoxGeometry(w,h,d);
+}
+}
+},
+
+// Enhanced 6 agents with specific building patterns
+agents:{
+0:{name:'SysAdmin',color:0xff0000,type:'system',side:'front',mode:'read',specialty:'Database & Storage Infrastructure',autoBuildType:'database',buildRate:0.8,instances:[],log:[],canWrite:false},
+1:{name:'DevOps',color:0x00ff00,type:'development',side:'right',mode:'read',specialty:'API Gateways & Service Mesh',autoBuildType:'api',buildRate:0.7,instances:[],log:[],canWrite:false},
+2:{name:'NetSec',color:0x0000ff,type:'security',side:'back',mode:'write',specialty:'Security & Caching Infrastructure',autoBuildType:'cache',buildRate:0.6,instances:[],log:[],canWrite:true},
+3:{name:'DataSci',color:0xffff00,type:'analytics',side:'left',mode:'write',specialty:'Queue & Message Processing',autoBuildType:'queue',buildRate:0.7,instances:[],log:[],canWrite:true},
+4:{name:'AI/ML',color:0xff00ff,type:'intelligence',side:'top',mode:'read',specialty:'Intelligent Microservices',autoBuildType:'microservice',buildRate:0.9,instances:[],log:[],canWrite:false},
+5:{name:'Cloud',color:0x00ffff,type:'infrastructure',side:'bottom',mode:'write',specialty:'Worker & Batch Processing',autoBuildType:'worker',buildRate:0.5,instances:[],log:[],canWrite:true}
+},
+
+// Utility functions
+getComponentsByType:(type)=>Array.from(CUBE.state.components.values()).filter(c=>c.type===type),
+
+Spatial:{
+gridSize:20,
+findSafePosition:(size,attempts=30)=>{
+for(let i=0;i<attempts;i++){
+const angle=Math.random()*Math.PI*2;
+const radius=50+Math.random()*80;
+const height=Math.random()*40+20;
+const pos=[Math.cos(angle)*radius,height,Math.sin(angle)*radius];
+
+let collision=false;
+CUBE.state.components.forEach(component=>{
+const dist=Math.sqrt(Math.pow(pos[0]-component.position[0],2)+Math.pow(pos[1]-component.position[1],2)+Math.pow(pos[2]-component.position[2],2));
+if(dist<20)collision=true;
+});
+
+if(!collision)return pos;
+}
+return[0,60+Math.random()*20,0];
+}
+},
+
+sendCommand:(command)=>{
+const agent=CUBE.agents[CUBE.state.currentFace];
+const timestamp=new Date().toTimeString().substr(0,8);
+CUBE.addToTerminal(`[${timestamp}] ${agent.name}@isa-system:~# ${command}`);
+
+let result='System processing in active mode...';
+if(command.includes('deploy')||command.includes('build')){
+const type=agent.autoBuildType;
+CUBE.AutoBuild.createComponent(type,CUBE.state.currentFace);
+result=`Deployed active ${type} component with full processing capabilities`;
+}else if(command.includes('load')||command.includes('test')){
+CUBE.Workload.generateLoad();
+result='Generated workload for all active components';
+}
+
+CUBE.addToTerminal(`[${timestamp}] ${result}`);
+agent.addLog=agent.addLog||function(msg){this.log.push(msg);if(this.log.length>20)this.log.shift();};
+agent.addLog(command);
+},
+
+addToTerminal:(text)=>{
+const terminal=CUBE.$('active-terminal');
+terminal.textContent+=text+'\\n';
+terminal.scrollTop=terminal.scrollHeight;
+},
+
+logCommunication:(message)=>{
+const timestamp=new Date().toTimeString().substr(0,8);
+CUBE.state.communications.push(`[${timestamp}] ${message}`);
+if(CUBE.state.communications.length>30)CUBE.state.communications.shift();
+},
+
+updateUI:()=>{
+// ISA Status
+const level=CUBE.Achievements.levels[CUBE.state.standards.currentLevel];
+CUBE.$('isa-status').innerHTML=`
+<div>${level.title}</div>
+<div>Points: ${CUBE.state.standards.points} / ${CUBE.Achievements.levels[CUBE.state.standards.currentLevel+1]?.threshold||'MAX'}</div>
+<div>Level: ${CUBE.state.standards.currentLevel}/10</div>
+`;
+
+// Achievements
+const achievementsDiv=CUBE.$('achievements');
+achievementsDiv.innerHTML='';
+Object.entries(CUBE.Achievements.achievements).forEach(([id,achievement])=>{
+const div=document.createElement('div');
+div.className=`achievement ${achievement.unlocked?'unlocked':''}`;
+div.innerHTML=`
+<strong>${achievement.name}</strong> (+${achievement.points})<br>
+${achievement.desc}
+${achievement.unlocked?'✅':'🔒'}
+`;
+achievementsDiv.appendChild(div);
+});
+
+// System metrics
+const perf=CUBE.state.performance;
+CUBE.$('system-metrics').innerHTML=`
+<div>🎯 Efficiency: ${perf.systemEfficiency.toFixed(1)}%</div>
+<div>⚡ Throughput: ${perf.totalThroughput.toFixed(1)}/sec</div>
+<div>🕐 Latency: ${perf.averageLatency.toFixed(1)}ms</div>
+<div>🛡️ Security: ${perf.securityScore.toFixed(0)}/100</div>
+<div>❌ Error Rate: ${perf.errorRate.toFixed(2)}%</div>
+`;
+
+// Active components
+const componentsDiv=CUBE.$('active-components');
+componentsDiv.innerHTML='';
+CUBE.state.components.forEach((component,id)=>{
+const div=document.createElement('div');
+div.className='component-active';
+div.style.borderLeftColor=`#${component.spec.colors[0].toString(16).padStart(6,'0')}`;
+const utilization=Math.min(100,(component.processing.currentLoad/component.processing.baseCapacity)*100);
+div.innerHTML=`
+<strong>${component.spec.name}</strong> (${id.split('_')[1]})<br>
+Load: ${utilization.toFixed(0)}% | Owner: ${CUBE.agents[component.ownerId].name}<br>
+<div class="performance-meter" style="width:${utilization}%"></div>
+`;
+componentsDiv.appendChild(div);
+});
+
+// Throughput stats
+const resources=CUBE.state.resources;
+CUBE.$('throughput-stats').innerHTML=`
+<div>✅ Completed: ${resources.completedJobs}</div>
+<div>❌ Failed: ${resources.failedJobs}</div>
+<div>🔄 Active: ${resources.activeJobs}</div>
+<div>📊 Success Rate: ${resources.completedJobs>0?((resources.completedJobs/(resources.completedJobs+resources.failedJobs))*100).toFixed(1):0}%</div>
+<div>🏗️ Components: ${CUBE.state.components.size}</div>
+`;
+},
+
+updateActiveDisplay:()=>{
+const agent=CUBE.agents[CUBE.state.currentFace];
+const terminal=CUBE.$('active-terminal');
+terminal.textContent=`=== ${agent.name} ACTIVE SYSTEM ===\\n`;
+terminal.textContent+=`Building: ${agent.autoBuildType} | Efficiency: ${CUBE.state.performance.systemEfficiency.toFixed(1)}%\\n`;
+terminal.textContent+='Recent Activity:\\n';
+terminal.textContent+=agent.log.slice(-4).join('\\n');
+terminal.scrollTop=terminal.scrollHeight;
+},
+
+kamehamehaBlast:()=>{
+CUBE.Workload.generateLoad();
+CUBE.state.resources.completedJobs+=100;
+CUBE.logCommunication('💥 POWER SURGE: Massive processing boost!');
+},
+
+init:()=>{
+console.log('Initializing Active ISA Achievement System...');
+
+CUBE.World.init();
+
+// Initialize agents
+Object.values(CUBE.agents).forEach(agent=>{
+agent.log=agent.log||[];
+agent.addLog=function(msg){this.log.push(msg);if(this.log.length>20)this.log.shift();};
+agent.addLog(`${agent.name} active system initialized`);
+});
+
+CUBE.updateActiveDisplay();
+
+console.log('Active component system ready with ISA achievements!');
+
+// System timers
+setInterval(()=>{
+CUBE.state.uptime++;
+CUBE.SystemMetrics.calculateMetrics();
+CUBE.Achievements.check();
+CUBE.Workload.autoGenerate();
+CUBE.updateUI();
+
+// Auto-building
+if(CUBE.state.uptime%8===0){
+Object.values(CUBE.agents).forEach((agent,index)=>{
+if(Math.random()<agent.buildRate*0.1){
+CUBE.AutoBuild.createComponent(agent.autoBuildType,index);
+}
+});
+}
+
+// Update face displays
+CUBE.World.textCanvases.forEach((face,index)=>{
+CUBE.World.updateFaceCanvas(face.context,face.agent,face.agentIndex);
+CUBE.World.faceMaterials[index].map.needsUpdate=true;
+});
+},2000);
+
+// Start with initial components
+setTimeout(()=>{
+CUBE.AutoBuild.createComponent('database',0);
+setTimeout(()=>CUBE.AutoBuild.createComponent('api',1),1000);
+setTimeout(()=>CUBE.AutoBuild.createComponent('microservice',4),2000);
+setTimeout(()=>CUBE.Workload.generateLoad(),4000);
+},3000);
+}
+};
+
+window.addEventListener('DOMContentLoaded',()=>{
+setTimeout(CUBE.init,100);
+});
+
+window.CUBE=CUBE;
+</script></body></html>
