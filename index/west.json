@@ -1,9 +1,7 @@
 {
-  "title": "API Reference",
-  "url": "docs/api/index.md",
-  "tags": ["west", "api", "reference"],
-  "enabled": true,
-  "description": "Browse the API documentation",
-  "refreshInterval": 0,
-  "allowInteraction": true
+  "_udt": "ISAchieve/Config/West|v1.0.0|2024-12-15|DevOps|West panel config|#Config#Panel",
+  "title": "Viz",
+  "url": "html/cube-linux-isa.html",
+  "tags": ["west", "visualization"],
+  "enabled": true
 }

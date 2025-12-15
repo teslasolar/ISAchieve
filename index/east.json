@@ -1,9 +1,7 @@
 {
-  "title": "Code Examples",
-  "url": "examples/basic-usage.js",
-  "tags": ["east", "examples", "code"],
-  "enabled": true,
-  "description": "Live examples and demos",
-  "refreshInterval": 0,
-  "allowInteraction": true
+  "_udt": "ISAchieve/Config/East|v1.0.0|2024-12-15|DevOps|East panel config|#Config#Panel",
+  "title": "Examples",
+  "url": "html/dashboard.html",
+  "tags": ["east", "examples"],
+  "enabled": true
 }

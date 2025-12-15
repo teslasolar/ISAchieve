@@ -1,9 +1,7 @@
 {
-  "title": "Quick Start",
-  "url": "docs/docs/getting-started.md",
-  "tags": ["south", "tutorial", "guide"],
-  "enabled": true,
-  "description": "Get started in minutes",
-  "refreshInterval": 0,
-  "allowInteraction": true
+  "_udt": "ISAchieve/Config/South|v1.0.0|2024-12-15|DevOps|South panel config|#Config#Panel",
+  "title": "Guide",
+  "url": "docs/index.html",
+  "tags": ["south", "guide"],
+  "enabled": true
 }

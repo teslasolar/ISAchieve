@@ -1,9 +1,6 @@
 {
-  "title": "Project Overview",
+  "title": "Home",
   "url": "docs/index.html",
-  "tags": ["north", "docs", "overview"],
-  "enabled": true,
-  "description": "Welcome and quick start guide",
-  "refreshInterval": 0,
-  "allowInteraction": true
+  "tags": ["north", "docs"],
+  "enabled": true
 }

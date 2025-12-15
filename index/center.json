@@ -1,9 +1,6 @@
 {
-  "title": "ISA Cube",
+  "title": "Main",
   "url": "html/cube-linux-isa.html",
   "tags": ["center", "visualization", "3d", "primary", "glow", "interactive"],
-  "enabled": true,
-  "description": "Interactive 3D visualization",
-  "refreshInterval": 0,
-  "allowInteraction": true
+  "enabled": true
 }
