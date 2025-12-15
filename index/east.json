@@ -1,9 +1,9 @@
 {
-  "title": "ISA Cube Visualization",
-  "url": "html/cube-linux-isa.html",
-  "tags": ["visualization", "3d", "isa"],
+  "title": "API Reference",
+  "url": "docs/api/index.md",
+  "tags": ["api", "reference", "docs"],
   "enabled": true,
-  "description": "Interactive ISA architecture visualization",
+  "description": "API documentation and code references",
   "refreshInterval": 0,
   "allowInteraction": true
 }

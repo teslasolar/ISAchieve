@@ -1,9 +1,9 @@
 {
-  "title": "API Reference",
-  "url": "docs/api/index.md",
-  "tags": ["api", "reference", "docs"],
+  "title": "Getting Started Guide",
+  "url": "docs/docs/getting-started.md",
+  "tags": ["guide", "tutorial", "docs"],
   "enabled": true,
-  "description": "API documentation and code references",
+  "description": "Quick start guide and tutorials",
   "refreshInterval": 0,
   "allowInteraction": true
 }

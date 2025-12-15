@@ -4,7 +4,8 @@ This directory contains JSON configuration files for each screen position in the
 
 ## Configuration Files
 
-- `north.json` - Top/header screen configuration
+- `center.json` - Main central screen (ISA Cube Visualization)
+- `north.json` - Top screen configuration
 - `east.json` - Right side screen configuration
 - `south.json` - Bottom screen configuration
 - `west.json` - Left side screen configuration
@@ -88,13 +89,17 @@ No need to modify the main `index.html` file!
 The grid layout uses these positions:
 
 ```
-┌─────────────────────────┐
-│         NORTH           │
-├───────────┬─────────────┤
-│   WEST    │    EAST     │
-├───────────┴─────────────┤
-│         SOUTH           │
-└─────────────────────────┘
+┌─────────────────────────────────┐
+│            NORTH                │
+├─────────┬─────────────┬─────────┤
+│  WEST   │   CENTER    │  EAST   │
+│         │  (Main ISA  │         │
+│         │    Cube)    │         │
+├─────────┴─────────────┴─────────┤
+│            SOUTH                │
+└─────────────────────────────────┘
 ```
+
+The CENTER position is larger and highlighted, designed for the main ISA cube visualization.
 
 Toggle between layouts using the "Toggle Grid Layout" button.

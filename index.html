@@ -21,12 +21,12 @@
 
         #dashboard {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
+            grid-template-columns: 1fr 2fr 1fr;
+            grid-template-rows: auto 1fr auto;
             grid-template-areas: 
-                "north north"
-                "west east"
-                "south south";
+                "north north north"
+                "west center east"
+                "south south south";
             gap: 10px;
             padding: 10px;
             height: 100vh;
@@ -50,6 +50,11 @@
         .screen-container.east { grid-area: east; }
         .screen-container.south { grid-area: south; }
         .screen-container.west { grid-area: west; }
+        .screen-container.center { 
+            grid-area: center;
+            border: 3px solid #667eea;
+            box-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
+        }
 
         .screen-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -158,6 +163,7 @@
                 grid-template-rows: auto;
                 grid-template-areas: 
                     "north"
+                    "center"
                     "west"
                     "east"
                     "south";
@@ -177,7 +183,7 @@
             constructor() {
                 this.screens = [];
                 this.currentLayout = 'default';
-                this.configPaths = ['north', 'east', 'south', 'west'];
+                this.configPaths = ['center', 'north', 'east', 'south', 'west'];
                 this.init();
             }
 
@@ -218,9 +224,10 @@
 
             getDefaultUrl(position) {
                 const urlMap = {
+                    'center': 'html/cube-linux-isa.html',
                     'north': 'docs/index.html',
-                    'east': 'html/cube-linux-isa.html',
-                    'south': 'docs/api/index.md',
+                    'east': 'docs/api/index.md',
+                    'south': 'docs/docs/getting-started.md',
                     'west': 'examples/basic-usage.js'
                 };
                 return urlMap[position] || 'docs/index.html';

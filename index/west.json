@@ -1,9 +1,9 @@
 {
-  "title": "Agent Metrics",
-  "url": "docs/docs/getting-started.md",
-  "tags": ["metrics", "monitoring", "live"],
+  "title": "Project Documentation",
+  "url": "docs/docs/index.md",
+  "tags": ["docs", "overview", "info"],
   "enabled": true,
-  "description": "Real-time agent performance metrics",
+  "description": "Project overview and documentation index",
   "refreshInterval": 0,
   "allowInteraction": true
 }
