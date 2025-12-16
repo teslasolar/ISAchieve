@@ -16,6 +16,7 @@ plugins:
 
 # Include these files
 include:
+  - index
   - core
   - compute
   - scada
@@ -36,9 +37,9 @@ exclude:
   - jest.config.js
   - .eslintrc.js
 
-# Default layout
+# No default layout - serve HTML as-is
 defaults:
   - scope:
       path: ""
     values:
-      layout: "default"
+      layout: null
