@@ -1,4 +1,4 @@
-/* UDT:ISAchieve/Index/Styles|v1.0.0|2024-12-16|DevOps|App styles|#Index#Styles#CSS */
+/* UDT:ISAchieve/Index/Styles|v1.1.0|2024-12-16|DevOps|App styles with agent panels|#Index#Styles#CSS */
 
 :root {
   --bg-primary: #0a0a1a;
@@ -265,6 +265,113 @@ body {
 .screen-loading.placeholder {
   color: var(--text-secondary);
   font-style: italic;
+}
+
+/* Status Panel */
+.status-panel {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 8px;
+  background: var(--bg-surface);
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+.status-row span:first-child {
+  color: var(--text-secondary);
+}
+
+.status-row span:last-child {
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+/* Agent Panel */
+.agent-panel {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.agent-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  background: var(--bg-surface);
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+.agent-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.agent-stat {
+  color: var(--text-secondary);
+  font-size: 10px;
+}
+
+/* Metrics Panel */
+.metrics-panel {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 8px;
+  background: var(--bg-surface);
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+.metric-row span:first-child {
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+.metric-row span:last-child {
+  color: var(--accent-blue);
+  font-weight: 600;
+}
+
+/* Generated Screen Indicator */
+.screen.generated {
+  border-style: dashed;
+}
+
+.screen.generated::after {
+  content: '⚡';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 10px;
+  opacity: 0.5;
+}
+
+/* Cube Mini Viz */
+.cube-mini {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 24px;
+  color: var(--text-secondary);
 }
 
 /* Responsive */

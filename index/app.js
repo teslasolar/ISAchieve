@@ -1,18 +1,104 @@
-/* UDT:ISAchieve/Index/App|v1.0.0|2024-12-16|DevOps|Main app controller|#Index#App#Controller */
+/* UDT:ISAchieve/Index/App|v1.1.0|2024-12-16|DevOps|Self-generating app controller|#Index#App#Agents */
 
 /**
- * ISAchieve App Controller
- * Main entry point for the index-based app structure
- * Loads screen configs from index/*.json and manages layout
+ * ISAchieve App Controller - Self-Generating Edition
+ * Agents dynamically create and manage screens/components
  */
+
+// Agent definitions - each agent manages different aspects
+const AGENTS = {
+  SysAdmin: { color: '#ff0000', specialty: 'system', builds: ['status', 'metrics'] },
+  DevOps:   { color: '#00ff00', specialty: 'api', builds: ['api', 'deploy'] },
+  NetSec:   { color: '#0000ff', specialty: 'security', builds: ['auth', 'firewall'] },
+  DataSci:  { color: '#ffff00', specialty: 'data', builds: ['charts', 'analytics'] },
+  AIML:     { color: '#ff00ff', specialty: 'compute', builds: ['cube', 'llm'] },
+  Cloud:    { color: '#00ffff', specialty: 'infra', builds: ['scale', 'deploy'] }
+};
+
+// Dynamic component registry - agents can add to this
+const COMPONENTS = {
+  terminal: (app, container) => app.createTerminal(container),
+  status: (app, container) => app.createStatusPanel(container),
+  agents: (app, container) => app.createAgentPanel(container),
+  metrics: (app, container) => app.createMetricsPanel(container),
+  cube: (app, container) => app.createCubeViz(container)
+};
 
 export class ISAchieveApp {
   constructor() {
     this.config = null;
     this.screens = new Map();
+    this.agents = new Map();
     this.layout = 'quad';
     this.container = null;
     this.initialized = false;
+    this.generatedComponents = [];
+    this.stats = { uptime: 0, generated: 0, agents: 0 };
+  }
+
+  // Initialize agents
+  initAgents() {
+    Object.entries(AGENTS).forEach(([name, config]) => {
+      this.agents.set(name, {
+        ...config,
+        name,
+        active: true,
+        spawned: 0,
+        lastAction: Date.now(),
+        log: []
+      });
+    });
+    this.stats.agents = this.agents.size;
+    console.log(`[ISA] ${this.agents.size} agents initialized`);
+  }
+
+  // Agent action - spawn component
+  agentSpawn(agentName, componentType, target) {
+    const agent = this.agents.get(agentName);
+    if (!agent) return null;
+
+    agent.spawned++;
+    agent.lastAction = Date.now();
+    agent.log.push(`Spawned ${componentType}`);
+    if (agent.log.length > 10) agent.log.shift();
+
+    this.stats.generated++;
+    this.generatedComponents.push({ type: componentType, agent: agentName, time: Date.now() });
+
+    this.log?.(`[${agentName}] Spawned ${componentType}`);
+    return { agent: agentName, component: componentType };
+  }
+
+  // Auto-generate screens based on what's available
+  async generateScreens() {
+    // Check if static configs exist, otherwise generate dynamically
+    const defaultScreens = [
+      { id: 'north', title: 'Status', component: 'status', tags: ['header', 'status'], priority: 1 },
+      { id: 'center', title: 'Main', url: 'html/cube-linux-isa.html', tags: ['primary', 'viz'], priority: 0 },
+      { id: 'east', title: 'Agents', component: 'agents', tags: ['agents', 'monitor'], priority: 2 },
+      { id: 'west', title: 'Metrics', component: 'metrics', tags: ['metrics', 'data'], priority: 3 },
+      { id: 'south', title: 'Console', component: 'terminal', tags: ['terminal'], priority: 4 }
+    ];
+
+    for (const screen of defaultScreens) {
+      // Try to load from JSON first
+      try {
+        const res = await fetch(`./index/${screen.id}.json`);
+        if (res.ok) {
+          const config = await res.json();
+          config.position = screen.id;
+          this.screens.set(screen.id, config);
+          continue;
+        }
+      } catch (e) { /* Generate instead */ }
+
+      // Generate dynamically if no JSON
+      screen.position = screen.id;
+      screen.enabled = true;
+      screen._generated = true;
+      this.screens.set(screen.id, screen);
+      this.agentSpawn('SysAdmin', screen.component || 'screen', screen.id);
+    }
   }
 
   // Load app manifest
@@ -21,31 +107,10 @@ export class ISAchieveApp {
       const res = await fetch('./index/app.json');
       this.config = await res.json();
       document.title = this.config.title || 'ISAchieve';
-      return this.config;
     } catch (e) {
-      console.warn('No app.json found, using defaults');
-      this.config = { name: 'ISAchieve', screens: {} };
-      return this.config;
+      this.config = { name: 'ISAchieve', version: '1.1.0', selfGen: true };
     }
-  }
-
-  // Load all screen configs
-  async loadScreens() {
-    const screenFiles = ['center', 'north', 'east', 'south', 'west'];
-
-    for (const name of screenFiles) {
-      try {
-        const res = await fetch(`./index/${name}.json`);
-        if (res.ok) {
-          const screen = await res.json();
-          screen.position = name;
-          this.screens.set(name, screen);
-        }
-      } catch (e) {
-        console.warn(`Could not load screen: ${name}`);
-      }
-    }
-    return this.screens;
+    return this.config;
   }
 
   // Create screen element
@@ -53,19 +118,19 @@ export class ISAchieveApp {
     const screen = document.createElement('div');
     screen.className = `screen screen-${name}`;
     screen.dataset.position = name;
+    if (config._generated) screen.classList.add('generated');
 
-    // Apply tags as classes
-    if (config.tags) {
-      config.tags.forEach(tag => screen.classList.add(`tag-${tag}`));
-    }
+    config.tags?.forEach(tag => screen.classList.add(`tag-${tag}`));
+
+    const agentColor = config._agent ? AGENTS[config._agent]?.color : null;
+    const headerStyle = agentColor ? `border-left: 3px solid ${agentColor}` : '';
 
     screen.innerHTML = `
-      <div class="screen-header">
+      <div class="screen-header" style="${headerStyle}">
         <span class="screen-title">${config.title || name}</span>
         <div class="screen-controls">
-          <button class="btn-minimize" title="Minimize">_</button>
-          <button class="btn-maximize" title="Maximize">□</button>
           <button class="btn-refresh" title="Refresh">↻</button>
+          <button class="btn-maximize" title="Maximize">□</button>
         </div>
       </div>
       <div class="screen-content">
@@ -73,70 +138,46 @@ export class ISAchieveApp {
       </div>
     `;
 
-    // Setup controls
-    const refreshBtn = screen.querySelector('.btn-refresh');
-    const maxBtn = screen.querySelector('.btn-maximize');
-
-    refreshBtn?.addEventListener('click', () => this.refreshScreen(name));
-    maxBtn?.addEventListener('click', () => this.toggleMaximize(name));
+    screen.querySelector('.btn-refresh')?.addEventListener('click', () => this.refreshScreen(name));
+    screen.querySelector('.btn-maximize')?.addEventListener('click', () => this.toggleMaximize(name));
 
     return screen;
   }
 
-  // Load iframe content
+  // Load screen content - iframe or component
   loadScreenContent(screen, config) {
     const content = screen.querySelector('.screen-content');
     const loading = screen.querySelector('.screen-loading');
 
-    // Handle disabled screens with placeholder
     if (config.enabled === false) {
       loading.textContent = config.placeholder || 'Disabled';
       loading.classList.add('placeholder');
       return;
     }
 
-    // Handle component-based screens (no iframe)
-    if (config.component) {
+    // Component-based (no iframe)
+    if (config.component && COMPONENTS[config.component]) {
       loading.style.display = 'none';
-      this.loadComponent(content, config.component, config);
+      COMPONENTS[config.component](this, content, config);
       return;
     }
 
-    // Handle null/empty URL
-    if (!config.url) {
-      loading.textContent = config.placeholder || 'No content';
+    // URL-based (iframe)
+    if (config.url) {
+      const iframe = document.createElement('iframe');
+      iframe.className = 'screen-iframe';
+      iframe.src = config.url;
+      iframe.setAttribute('loading', 'lazy');
+      iframe.onload = () => loading.style.display = 'none';
+      iframe.onerror = () => { loading.textContent = `Failed: ${config.url}`; loading.classList.add('error'); };
+      content.appendChild(iframe);
       return;
     }
 
-    const iframe = document.createElement('iframe');
-    iframe.className = 'screen-iframe';
-    iframe.src = config.url;
-    iframe.setAttribute('loading', 'lazy');
-
-    iframe.onload = () => {
-      loading.style.display = 'none';
-    };
-
-    iframe.onerror = () => {
-      loading.textContent = `Failed: ${config.url}`;
-      loading.classList.add('error');
-    };
-
-    content.appendChild(iframe);
+    loading.textContent = config.placeholder || 'No content';
   }
 
-  // Load built-in component
-  loadComponent(container, type, config) {
-    switch (type) {
-      case 'terminal':
-        this.createTerminal(container);
-        break;
-      default:
-        container.innerHTML = `<div class="screen-loading">Unknown: ${type}</div>`;
-    }
-  }
-
-  // Create terminal component
+  // Built-in components
   createTerminal(container) {
     container.innerHTML = `
       <div class="terminal-wrapper">
@@ -153,13 +194,14 @@ export class ISAchieveApp {
 
     this.log = (msg) => {
       const line = document.createElement('div');
-      line.textContent = msg;
+      line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
       output.appendChild(line);
       output.scrollTop = output.scrollHeight;
+      if (output.children.length > 100) output.firstChild.remove();
     };
 
-    this.log('ISAchieve Console v1.0');
-    this.log('Type "help" for commands');
+    this.log('ISAchieve Self-Gen Console v1.1');
+    this.log(`${this.agents.size} agents active`);
 
     input.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
@@ -170,6 +212,61 @@ export class ISAchieveApp {
     });
   }
 
+  createStatusPanel(container) {
+    container.innerHTML = `<div class="status-panel" id="status-panel"></div>`;
+    this.updateStatus = () => {
+      const panel = container.querySelector('#status-panel');
+      if (panel) {
+        panel.innerHTML = `
+          <div class="status-row"><span>Uptime</span><span>${this.stats.uptime}s</span></div>
+          <div class="status-row"><span>Agents</span><span>${this.stats.agents}</span></div>
+          <div class="status-row"><span>Generated</span><span>${this.stats.generated}</span></div>
+          <div class="status-row"><span>Screens</span><span>${this.screens.size}</span></div>
+        `;
+      }
+    };
+    this.updateStatus();
+  }
+
+  createAgentPanel(container) {
+    container.innerHTML = `<div class="agent-panel" id="agent-panel"></div>`;
+    this.updateAgents = () => {
+      const panel = container.querySelector('#agent-panel');
+      if (panel) {
+        panel.innerHTML = Array.from(this.agents.values()).map(a => `
+          <div class="agent-row" style="border-left: 3px solid ${a.color}">
+            <span class="agent-name">${a.name}</span>
+            <span class="agent-stat">${a.spawned} spawned</span>
+          </div>
+        `).join('');
+      }
+    };
+    this.updateAgents();
+  }
+
+  createMetricsPanel(container) {
+    container.innerHTML = `<div class="metrics-panel" id="metrics-panel"></div>`;
+    this.updateMetrics = () => {
+      const panel = container.querySelector('#metrics-panel');
+      if (panel) {
+        const total = this.generatedComponents.length;
+        const byType = {};
+        this.generatedComponents.forEach(c => byType[c.type] = (byType[c.type] || 0) + 1);
+        panel.innerHTML = `
+          <div class="metric-row"><span>Total Components</span><span>${total}</span></div>
+          ${Object.entries(byType).map(([t, c]) => `
+            <div class="metric-row"><span>${t}</span><span>${c}</span></div>
+          `).join('')}
+        `;
+      }
+    };
+    this.updateMetrics();
+  }
+
+  createCubeViz(container) {
+    container.innerHTML = `<div class="cube-mini">🧊 Cube Viz</div>`;
+  }
+
   // Execute terminal command
   exec(cmd) {
     this.log(`> ${cmd}`);
@@ -177,38 +274,42 @@ export class ISAchieveApp {
 
     switch (command) {
       case 'help':
-        this.log('screens | layout <type> | refresh <id> | clear | ver');
+        this.log('agents | spawn <agent> <type> | screens | layout <type> | stats | clear');
+        break;
+      case 'agents':
+        this.agents.forEach(a => this.log(`  ${a.name}: ${a.spawned} spawned [${a.specialty}]`));
+        break;
+      case 'spawn':
+        if (args[0] && args[1]) {
+          const result = this.agentSpawn(args[0], args[1], 'dynamic');
+          result ? this.log(`Spawned ${args[1]} via ${args[0]}`) : this.log(`Unknown agent: ${args[0]}`);
+        } else {
+          this.log('Usage: spawn <agent> <type>');
+        }
         break;
       case 'screens':
-        this.screens.forEach((s, id) => this.log(`  ${id}: ${s.title}`));
+        this.screens.forEach((s, id) => this.log(`  ${id}: ${s.title} ${s._generated ? '[gen]' : ''}`));
         break;
       case 'layout':
         args[0] ? (this.setLayout(args[0]), this.log(`Layout: ${args[0]}`)) : this.log(`Layout: ${this.layout}`);
         break;
-      case 'refresh':
-        args[0] && (this.refreshScreen(args[0]), this.log(`Refreshed ${args[0]}`));
+      case 'stats':
+        this.log(`Uptime: ${this.stats.uptime}s | Agents: ${this.stats.agents} | Generated: ${this.stats.generated}`);
         break;
       case 'clear':
         document.querySelector('#term-out').innerHTML = '';
-        break;
-      case 'ver':
-        this.log(`v${this.config?.version || '1.0.0'}`);
         break;
       default:
         this.log(`? ${command}`);
     }
   }
 
-  // Refresh a screen
   refreshScreen(name) {
     const screen = this.container?.querySelector(`.screen-${name}`);
     const iframe = screen?.querySelector('iframe');
-    if (iframe) {
-      iframe.src = iframe.src;
-    }
+    if (iframe) iframe.src = iframe.src;
   }
 
-  // Toggle maximize
   toggleMaximize(name) {
     const screen = this.container?.querySelector(`.screen-${name}`);
     if (screen) {
@@ -217,25 +318,19 @@ export class ISAchieveApp {
     }
   }
 
-  // Set layout
   setLayout(layout) {
     this.layout = layout;
-    if (this.container) {
-      this.container.dataset.layout = layout;
-    }
+    if (this.container) this.container.dataset.layout = layout;
   }
 
-  // Render app
   render() {
     const app = document.createElement('div');
     app.className = 'isa-app';
     app.dataset.layout = this.layout;
 
-    // Create dock container
     const dock = document.createElement('div');
     dock.className = 'dock-container';
 
-    // Render screens in order
     const order = ['north', 'west', 'center', 'east', 'south'];
     for (const name of order) {
       const config = this.screens.get(name);
@@ -251,7 +346,6 @@ export class ISAchieveApp {
     return app;
   }
 
-  // Mount to DOM
   mount(target) {
     const el = typeof target === 'string' ? document.querySelector(target) : target;
     if (el && this.container) {
@@ -260,34 +354,50 @@ export class ISAchieveApp {
     }
   }
 
-  // Initialize app
+  // Start update loop
+  startLoop() {
+    setInterval(() => {
+      this.stats.uptime++;
+      this.updateStatus?.();
+      this.updateAgents?.();
+      this.updateMetrics?.();
+
+      // Random agent activity
+      if (Math.random() > 0.9) {
+        const agentNames = Array.from(this.agents.keys());
+        const agent = agentNames[Math.floor(Math.random() * agentNames.length)];
+        const types = ['metric', 'event', 'check', 'scan'];
+        const type = types[Math.floor(Math.random() * types.length)];
+        this.agentSpawn(agent, type, 'auto');
+      }
+    }, 1000);
+  }
+
   async init() {
     if (this.initialized) return this;
 
+    this.initAgents();
     await this.loadConfig();
-    await this.loadScreens();
+    await this.generateScreens();
 
     this.initialized = true;
-    console.log(`[ISAchieve] Loaded ${this.screens.size} screens`);
+    console.log(`[ISA] Self-Gen App initialized: ${this.screens.size} screens, ${this.agents.size} agents`);
 
     return this;
   }
 
-  // Quick start
   static async start(target = '#app') {
     const app = new ISAchieveApp();
     await app.init();
     app.render();
     app.mount(target);
+    app.startLoop();
 
-    // Expose globally
-    window.ISAchieveApp = app;
-
+    window.ISA = app;
     return app;
   }
 }
 
-// Auto-init if script loaded directly
 if (typeof window !== 'undefined') {
   window.ISAchieveApp = ISAchieveApp;
 }
