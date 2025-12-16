@@ -1,0 +1,80 @@
+# Konomi ISAchieve Server Configuration
+
+# API Server Settings
+server:
+  name: "Konomi ISAchieve API"
+  version: "1.0.0"
+  port: 3000
+  cors: true
+
+# CLI Commands exposed as API endpoints
+commands:
+  - name: "list-achievements"
+    description: "List all achievements"
+    command: "konomi achieve list"
+    enabled: true
+    allowMultiple: true
+    timeout: 5000
+    tags:
+      - achievements
+      - read
+
+  - name: "unlock-achievement"
+    description: "Unlock an achievement"
+    command: "konomi achieve unlock {0}"
+    enabled: true
+    allowMultiple: false
+    timeout: 5000
+    tags:
+      - achievements
+      - write
+
+  - name: "system-status"
+    description: "Get system status"
+    command: "uname -a && uptime"
+    enabled: true
+    allowMultiple: true
+    timeout: 3000
+    tags:
+      - system
+      - info
+
+  - name: "git-status"
+    description: "Get git repository status"
+    command: "cd {workdir} && git status --short"
+    enabled: true
+    allowMultiple: true
+    timeout: 5000
+    tags:
+      - git
+      - vcs
+
+  - name: "run-tests"
+    description: "Run test suite"
+    command: "npm test"
+    enabled: true
+    allowMultiple: false
+    timeout: 60000
+    tags:
+      - testing
+      - ci
+
+  - name: "build-project"
+    description: "Build the project"
+    command: "npm run build"
+    enabled: true
+    allowMultiple: false
+    timeout: 120000
+    tags:
+      - build
+      - ci
+
+# Rate limiting
+rateLimit:
+  windowMs: 60000  # 1 minute
+  maxRequests: 100
+
+# Authentication (optional)
+auth:
+  enabled: false
+  apiKey: "your-api-key-here"

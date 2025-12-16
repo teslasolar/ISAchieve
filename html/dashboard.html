@@ -1,0 +1,745 @@
+<!--
+================================================================================
+UDT: ISAchieve/Views/Dashboard
+Version: 1.0.0
+Created: 2024-12-15
+Author: DevOps
+Modified: 2024-12-15 | DevOps | Main SCADA dashboard
+Tags: #View #Dashboard #Perspective #SCADA
+Dependencies: ../scada/main.js
+================================================================================
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ISAchieve SCADA Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-primary: #0a0a1a;
+      --bg-secondary: #12122a;
+      --bg-panel: rgba(20, 20, 50, 0.9);
+      --border-color: #2a2a5a;
+      --text-primary: #e0e0ff;
+      --text-secondary: #8080b0;
+      --accent-green: #00ff88;
+      --accent-blue: #00aaff;
+      --accent-yellow: #ffcc00;
+      --accent-red: #ff4466;
+      --accent-purple: #aa66ff;
+    }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 12px;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 300px 1fr 350px;
+      grid-template-rows: auto 1fr auto;
+      gap: 10px;
+      padding: 10px;
+      height: 100vh;
+    }
+
+    .header {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #1a1a3a 0%, #0a0a2a 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .header h1 {
+      font-size: 18px;
+      color: var(--accent-blue);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-stats {
+      display: flex;
+      gap: 20px;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--accent-green);
+    }
+
+    .stat-label {
+      font-size: 9px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
+
+    .panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .panel-title {
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* Left column panels */
+    .achievements-panel { border-color: var(--accent-yellow); }
+    .achievements-panel .panel-title { color: var(--accent-yellow); }
+
+    .tags-panel { border-color: var(--accent-blue); }
+    .tags-panel .panel-title { color: var(--accent-blue); }
+
+    /* Center panels */
+    .main-area {
+      display: grid;
+      grid-template-rows: 1fr 200px;
+      gap: 10px;
+    }
+
+    .visualization-panel { border-color: var(--accent-purple); }
+    .visualization-panel .panel-title { color: var(--accent-purple); }
+
+    .terminal-panel { border-color: var(--accent-green); }
+    .terminal-panel .panel-title { color: var(--accent-green); }
+
+    /* Right column panels */
+    .metrics-panel { border-color: var(--accent-blue); }
+    .metrics-panel .panel-title { color: var(--accent-blue); }
+
+    .components-panel { border-color: var(--accent-green); }
+    .components-panel .panel-title { color: var(--accent-green); }
+
+    /* Achievement item */
+    .achievement {
+      background: rgba(50, 50, 20, 0.5);
+      border: 1px solid #665500;
+      border-radius: 4px;
+      padding: 6px 8px;
+      margin-bottom: 4px;
+      font-size: 10px;
+    }
+
+    .achievement.unlocked {
+      background: rgba(0, 80, 40, 0.5);
+      border-color: var(--accent-green);
+    }
+
+    .achievement-name {
+      font-weight: bold;
+    }
+
+    .achievement-points {
+      float: right;
+      color: var(--accent-yellow);
+    }
+
+    /* Tag item */
+    .tag-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      font-size: 10px;
+    }
+
+    .tag-path {
+      color: var(--accent-blue);
+    }
+
+    .tag-value {
+      color: var(--accent-green);
+    }
+
+    /* Metric item */
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .metric-bar {
+      width: 100px;
+      height: 8px;
+      background: var(--bg-secondary);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .metric-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-green), var(--accent-blue));
+      transition: width 0.3s;
+    }
+
+    /* Component item */
+    .component {
+      background: rgba(0, 40, 40, 0.5);
+      border-left: 3px solid var(--accent-green);
+      padding: 6px 8px;
+      margin-bottom: 4px;
+      font-size: 10px;
+    }
+
+    .component-name {
+      font-weight: bold;
+      color: var(--accent-blue);
+    }
+
+    .component-status {
+      float: right;
+      font-size: 9px;
+    }
+
+    .status-active { color: var(--accent-green); }
+    .status-idle { color: var(--accent-yellow); }
+    .status-error { color: var(--accent-red); }
+
+    /* Terminal */
+    .terminal {
+      background: #000;
+      color: var(--accent-green);
+      font-family: monospace;
+      font-size: 10px;
+      padding: 8px;
+      height: 100%;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .terminal-input {
+      display: flex;
+      gap: 5px;
+      margin-top: 8px;
+    }
+
+    .terminal-input input {
+      flex: 1;
+      background: #111;
+      border: 1px solid var(--accent-green);
+      color: var(--accent-green);
+      padding: 5px;
+      font-family: monospace;
+      font-size: 10px;
+    }
+
+    /* Canvas */
+    #vizCanvas {
+      width: 100%;
+      height: 100%;
+      background: #000011;
+      border-radius: 4px;
+    }
+
+    /* Footer */
+    .footer {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 15px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 10px;
+    }
+
+    .footer-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 5px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 10px;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: var(--bg-secondary);
+      border-color: var(--accent-blue);
+    }
+
+    .btn-primary {
+      background: var(--accent-blue);
+      color: #000;
+      border-color: var(--accent-blue);
+    }
+
+    /* Level display */
+    .level-display {
+      background: linear-gradient(135deg, #332200, #1a1100);
+      border: 2px solid var(--accent-yellow);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .level-number {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--accent-yellow);
+    }
+
+    .level-name {
+      font-size: 10px;
+      color: var(--text-secondary);
+    }
+
+    .level-progress {
+      height: 6px;
+      background: var(--bg-primary);
+      border-radius: 3px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .level-progress-fill {
+      height: 100%;
+      background: var(--accent-yellow);
+      transition: width 0.5s;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <!-- Header -->
+    <div class="header">
+      <h1>
+        <span style="font-size: 24px;">🏭</span>
+        ISAchieve SCADA Dashboard
+      </h1>
+      <div class="header-stats">
+        <div class="stat">
+          <div class="stat-value" id="stat-uptime">0</div>
+          <div class="stat-label">Uptime (s)</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="stat-components">0</div>
+          <div class="stat-label">Components</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="stat-throughput">0</div>
+          <div class="stat-label">Ops/sec</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="stat-points">0</div>
+          <div class="stat-label">Points</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Left Column -->
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div class="panel achievements-panel">
+        <div class="panel-header">
+          <span class="panel-title">🏆 ISA Achievements</span>
+        </div>
+        <div class="level-display">
+          <div class="level-number" id="level-number">0</div>
+          <div class="level-name" id="level-name">Basic Setup</div>
+          <div class="level-progress">
+            <div class="level-progress-fill" id="level-progress" style="width: 0%"></div>
+          </div>
+        </div>
+        <div class="panel-content" id="achievements-list"></div>
+      </div>
+
+      <div class="panel tags-panel" style="flex: 1;">
+        <div class="panel-header">
+          <span class="panel-title">🏷️ Tag Browser</span>
+        </div>
+        <div class="panel-content" id="tags-list"></div>
+      </div>
+    </div>
+
+    <!-- Center Area -->
+    <div class="main-area">
+      <div class="panel visualization-panel">
+        <div class="panel-header">
+          <span class="panel-title">📊 System Visualization</span>
+          <span id="viz-status" style="font-size: 9px; color: var(--text-secondary);">Initializing...</span>
+        </div>
+        <canvas id="vizCanvas"></canvas>
+      </div>
+
+      <div class="panel terminal-panel">
+        <div class="panel-header">
+          <span class="panel-title">💻 Command Terminal</span>
+        </div>
+        <div class="terminal" id="terminal"></div>
+        <div class="terminal-input">
+          <input type="text" id="terminal-input" placeholder="Enter command..." onkeypress="if(event.key==='Enter')sendCommand()">
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div class="panel metrics-panel">
+        <div class="panel-header">
+          <span class="panel-title">📈 Performance Metrics</span>
+        </div>
+        <div class="panel-content" id="metrics-list"></div>
+      </div>
+
+      <div class="panel components-panel" style="flex: 1;">
+        <div class="panel-header">
+          <span class="panel-title">⚙️ Active Components</span>
+        </div>
+        <div class="panel-content" id="components-list"></div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div>
+        <span style="color: var(--accent-green);">●</span> System Online |
+        <span id="footer-status">Initializing...</span>
+      </div>
+      <div class="footer-actions">
+        <button class="btn" onclick="generateLoad()">🚀 Generate Load</button>
+        <button class="btn" onclick="addCube()">🧊 Add Cube</button>
+        <button class="btn btn-primary" onclick="powerSurge()">💥 Power Surge</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Import main SCADA system
+    import ISA from '../scada/main.js';
+
+    // Make available globally
+    window.ISA = ISA;
+
+    // Dashboard state
+    const dashboard = {
+      canvas: null,
+      ctx: null,
+      animationId: null,
+      particles: [],
+      cubeVisuals: []
+    };
+
+    // Initialize dashboard
+    async function init() {
+      log('ISAchieve Dashboard starting...');
+
+      // Wait for ISA system
+      await ISA.init();
+      log('SCADA system initialized');
+
+      // Setup visualization
+      setupVisualization();
+
+      // Start UI update loop
+      setInterval(updateUI, 500);
+
+      // Subscribe to WebSocket updates
+      ISA.ws.subscribe('*', (msg) => {
+        updateMetric(msg.topic, msg.data);
+      });
+
+      log('Dashboard ready');
+      document.getElementById('footer-status').textContent = 'Running';
+      document.getElementById('viz-status').textContent = 'Active';
+    }
+
+    // Setup canvas visualization
+    function setupVisualization() {
+      dashboard.canvas = document.getElementById('vizCanvas');
+      dashboard.ctx = dashboard.canvas.getContext('2d');
+
+      // Set canvas size
+      const resize = () => {
+        const rect = dashboard.canvas.parentElement.getBoundingClientRect();
+        dashboard.canvas.width = rect.width - 20;
+        dashboard.canvas.height = rect.height - 40;
+      };
+      resize();
+      window.addEventListener('resize', resize);
+
+      // Initialize particles
+      for (let i = 0; i < 50; i++) {
+        dashboard.particles.push({
+          x: Math.random() * dashboard.canvas.width,
+          y: Math.random() * dashboard.canvas.height,
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2,
+          size: Math.random() * 3 + 1,
+          color: `hsl(${Math.random() * 60 + 180}, 100%, 60%)`
+        });
+      }
+
+      // Start animation
+      animate();
+    }
+
+    // Animation loop
+    function animate() {
+      const ctx = dashboard.ctx;
+      const w = dashboard.canvas.width;
+      const h = dashboard.canvas.height;
+
+      // Clear with fade effect
+      ctx.fillStyle = 'rgba(0, 0, 17, 0.1)';
+      ctx.fillRect(0, 0, w, h);
+
+      // Draw grid
+      ctx.strokeStyle = 'rgba(0, 100, 150, 0.1)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < w; x += 30) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+      for (let y = 0; y < h; y += 30) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      // Update and draw particles
+      for (const p of dashboard.particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < 0 || p.x > w) p.vx *= -1;
+        if (p.y < 0 || p.y > h) p.vy *= -1;
+
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Draw cube representations
+      const cubes = ISA.cubeManager.list();
+      const cubeSize = 20;
+      const cols = Math.floor(w / (cubeSize + 10));
+
+      cubes.slice(0, 20).forEach((cube, i) => {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        const x = col * (cubeSize + 10) + 20;
+        const y = row * (cubeSize + 10) + 20;
+
+        // Cube outline
+        ctx.strokeStyle = `hsl(${(i * 30) % 360}, 80%, 50%)`;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, cubeSize, cubeSize);
+
+        // Center indicator
+        const center = cube.getCenter();
+        const intensity = Math.min(1, center / 100);
+        ctx.fillStyle = `rgba(0, 255, 136, ${intensity})`;
+        ctx.fillRect(x + 5, y + 5, cubeSize - 10, cubeSize - 10);
+      });
+
+      // Stats text
+      const stats = ISA.getStats();
+      ctx.fillStyle = '#00ff88';
+      ctx.font = '10px monospace';
+      ctx.fillText(`Cubes: ${stats.cubes.cubeCount}`, 10, h - 30);
+      ctx.fillText(`eVGPU: ${stats.evgpu.opsPerSecond.toFixed(0)} ops/s`, 10, h - 18);
+      ctx.fillText(`Level: ${stats.achievements.level}`, 10, h - 6);
+
+      dashboard.animationId = requestAnimationFrame(animate);
+    }
+
+    // Update UI elements
+    function updateUI() {
+      const stats = ISA.getStats();
+
+      // Header stats
+      document.getElementById('stat-uptime').textContent = stats.system.uptime;
+      document.getElementById('stat-components').textContent = stats.cubes.cubeCount;
+      document.getElementById('stat-throughput').textContent = stats.evgpu.opsPerSecond.toFixed(0);
+      document.getElementById('stat-points').textContent = stats.achievements.points;
+
+      // Level display
+      const level = stats.achievements.level;
+      const levelInfo = ISA.achievements.levels[level] || ISA.achievements.levels[0];
+      const nextLevel = ISA.achievements.levels[level + 1];
+
+      document.getElementById('level-number').textContent = level;
+      document.getElementById('level-name').textContent = levelInfo.name;
+
+      if (nextLevel) {
+        const progress = ((stats.achievements.points - levelInfo.threshold) /
+          (nextLevel.threshold - levelInfo.threshold)) * 100;
+        document.getElementById('level-progress').style.width = `${Math.max(0, Math.min(100, progress))}%`;
+      }
+
+      // Achievements list
+      const achievementsHtml = Object.entries(ISA.achievements.definitions)
+        .map(([id, ach]) => {
+          const unlocked = ISA.achievements.unlocked.has(id);
+          return `<div class="achievement ${unlocked ? 'unlocked' : ''}">
+            <span class="achievement-name">${unlocked ? '✅' : '🔒'} ${ach.name}</span>
+            <span class="achievement-points">+${ach.points}</span>
+            <div style="font-size:9px;color:#888">${ach.desc}</div>
+          </div>`;
+        }).join('');
+      document.getElementById('achievements-list').innerHTML = achievementsHtml;
+
+      // Tags list
+      const tags = ISA.tags.browse('ISAchieve').slice(0, 15);
+      const tagsHtml = tags.map(path => {
+        const shortPath = path.replace('[default]', '');
+        const value = ISA.tags.read(path);
+        return `<div class="tag-item">
+          <span class="tag-path">${shortPath}</span>
+          <span class="tag-value">${typeof value.value === 'number' ? value.value.toFixed(2) : value.value}</span>
+        </div>`;
+      }).join('');
+      document.getElementById('tags-list').innerHTML = tagsHtml;
+
+      // Metrics
+      const metricsHtml = `
+        <div class="metric">
+          <span>CPU Utilization</span>
+          <div class="metric-bar"><div class="metric-fill" style="width:${stats.evgpu.utilization}%"></div></div>
+        </div>
+        <div class="metric">
+          <span>eVGPU Ops/s</span>
+          <div class="metric-bar"><div class="metric-fill" style="width:${Math.min(100, stats.evgpu.opsPerSecond)}%"></div></div>
+        </div>
+        <div class="metric">
+          <span>LLM Latency</span>
+          <div class="metric-bar"><div class="metric-fill" style="width:${Math.min(100, 100 - stats.llm.avgLatency)}%"></div></div>
+        </div>
+        <div class="metric">
+          <span>Total Ops</span>
+          <span style="color:var(--accent-green)">${stats.evgpu.totalOps}</span>
+        </div>
+        <div class="metric">
+          <span>LLM Inferences</span>
+          <span style="color:var(--accent-blue)">${stats.llm.inferenceCount}</span>
+        </div>
+      `;
+      document.getElementById('metrics-list').innerHTML = metricsHtml;
+
+      // Components list
+      const cubes = ISA.cubeManager.list().slice(0, 10);
+      const componentsHtml = cubes.map(cube => `
+        <div class="component">
+          <span class="component-name">${cube.id}</span>
+          <span class="component-status status-active">●</span>
+          <div style="font-size:9px;color:#888">
+            CTR: ${cube.getCenter().toFixed(2)} | Processed: ${cube.metadata.processCount}
+          </div>
+        </div>
+      `).join('');
+      document.getElementById('components-list').innerHTML = componentsHtml;
+    }
+
+    // Metric update from WebSocket
+    function updateMetric(topic, data) {
+      // Real-time updates handled by updateUI
+    }
+
+    // Terminal logging
+    function log(message) {
+      const terminal = document.getElementById('terminal');
+      const timestamp = new Date().toTimeString().slice(0, 8);
+      terminal.textContent += `[${timestamp}] ${message}\n`;
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    // Send terminal command
+    window.sendCommand = function() {
+      const input = document.getElementById('terminal-input');
+      const cmd = input.value.trim();
+      input.value = '';
+
+      if (!cmd) return;
+
+      log(`> ${cmd}`);
+
+      // Parse command
+      if (cmd.startsWith('api ')) {
+        const path = cmd.slice(4);
+        ISA.api.get(path).then(r => log(JSON.stringify(r, null, 2)));
+      } else if (cmd === 'stats') {
+        log(JSON.stringify(ISA.getStats(), null, 2));
+      } else if (cmd === 'cubes') {
+        log(`Cubes: ${ISA.cubeManager.list().length}`);
+      } else if (cmd === 'load') {
+        ISA.generateLoad(1).then(n => log(`Generated ${n} operations`));
+      } else if (cmd === 'help') {
+        log('Commands: api <path>, stats, cubes, load, help');
+      } else {
+        log(`Unknown command: ${cmd}`);
+      }
+    };
+
+    // Action buttons
+    window.generateLoad = function() {
+      log('Generating load...');
+      ISA.generateLoad(2).then(n => log(`Generated ${n} operations`));
+    };
+
+    window.addCube = function() {
+      const cube = ISA.cubeManager.create({ owner: 'manual' });
+      log(`Created cube: ${cube.id}`);
+    };
+
+    window.powerSurge = function() {
+      log('💥 POWER SURGE!');
+      ISA.generateLoad(10).then(n => log(`Massive surge: ${n} operations`));
+    };
+
+    // Initialize on load
+    init();
+  </script>
+</body>
+</html>

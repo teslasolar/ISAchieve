@@ -1,0 +1,38 @@
+{
+  "_udt": "ISAchieve/Index/App|v1.0.0|2024-12-16|DevOps|App manifest|#Index#App#Config",
+  "name": "ISAchieve",
+  "version": "1.0.0",
+  "title": "ISAchieve SCADA Sandbox",
+  "description": "Self-Generating SCADA System with ISA Achievements",
+  "entry": "index/app.js",
+  "layout": {
+    "type": "dock",
+    "default": "quad",
+    "available": ["quad", "single", "grid", "stack"]
+  },
+  "screens": {
+    "center": "./center.json",
+    "north": "./north.json",
+    "east": "./east.json",
+    "south": "./south.json",
+    "west": "./west.json"
+  },
+  "theme": {
+    "primary": "#667eea",
+    "secondary": "#764ba2",
+    "background": "#0a0a1a",
+    "surface": "#12122a",
+    "text": "#e0e0ff",
+    "accent": "#00ff88"
+  },
+  "features": {
+    "autoRefresh": false,
+    "hotReload": true,
+    "persistence": true,
+    "websocket": false
+  },
+  "api": {
+    "base": "/api",
+    "mcp": "/api/mcp"
+  }
+}

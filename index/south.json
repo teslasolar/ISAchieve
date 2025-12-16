@@ -1,7 +1,11 @@
 {
-  "_udt": "ISAchieve/Config/South|v1.0.0|2024-12-15|DevOps|South panel config|#Config#Panel",
-  "title": "Guide",
-  "url": "docs/index.html",
-  "tags": ["south", "guide"],
-  "enabled": true
+  "_udt": "ISAchieve/Index/South|v1.0.0|2024-12-16|DevOps|South dock screen|#Index#Screen#South",
+  "id": "south",
+  "title": "Console",
+  "url": null,
+  "tags": ["south", "console", "terminal"],
+  "enabled": true,
+  "priority": 5,
+  "component": "terminal",
+  "size": { "maxHeight": 180 }
 }

@@ -1,6 +1,10 @@
 {
+  "_udt": "ISAchieve/Index/North|v1.0.0|2024-12-16|DevOps|North dock screen|#Index#Screen#North",
+  "id": "north",
   "title": "Home",
   "url": "docs/index.html",
-  "tags": ["north", "docs"],
-  "enabled": true
+  "tags": ["north", "docs", "header"],
+  "enabled": true,
+  "priority": 2,
+  "size": { "maxHeight": 200 }
 }

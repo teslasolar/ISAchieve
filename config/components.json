@@ -1,0 +1,124 @@
+{
+  "_udt": "ISAchieve/Config/Components|v1.0.0|2024-12-15|SysAdmin|Component registry|#Config#Components#SCADA",
+  "componentTypes": {
+    "database": {
+      "name": "Database",
+      "icon": "🗄️",
+      "colors": ["#0088ff", "#0066cc", "#004499"],
+      "shapes": ["cylinder", "box"],
+      "capabilities": ["store", "query", "index", "backup", "replicate", "partition"],
+      "connections": ["api", "microservice", "cache", "worker"],
+      "isaContribution": {"ISA-95": 10, "ISO-27001": 5}
+    },
+    "api": {
+      "name": "API Gateway",
+      "icon": "🌐",
+      "colors": ["#ff8800", "#cc6600", "#994400"],
+      "shapes": ["pyramid", "octahedron"],
+      "capabilities": ["route", "authenticate", "rate-limit", "transform", "cache", "load-balance"],
+      "connections": ["database", "microservice", "frontend", "cache"],
+      "isaContribution": {"ISA-101": 15, "ITIL": 10}
+    },
+    "microservice": {
+      "name": "Microservice",
+      "icon": "⚙️",
+      "colors": ["#88ff00", "#66cc00", "#449900"],
+      "shapes": ["box", "dodecahedron"],
+      "capabilities": ["process", "compute", "validate", "notify", "scale", "recover"],
+      "connections": ["database", "api", "queue", "cache", "worker"],
+      "isaContribution": {"ISA-88": 20, "DevOps": 15}
+    },
+    "cache": {
+      "name": "Cache Layer",
+      "icon": "💾",
+      "colors": ["#ff0088", "#cc0066", "#990044"],
+      "shapes": ["sphere", "icosahedron"],
+      "capabilities": ["cache", "expire", "invalidate", "warm", "distribute", "compress"],
+      "connections": ["database", "api", "microservice"],
+      "isaContribution": {"ISA-95": 8, "DevOps": 12}
+    },
+    "queue": {
+      "name": "Message Queue",
+      "icon": "📬",
+      "colors": ["#8800ff", "#6600cc", "#440099"],
+      "shapes": ["torus", "cylinder"],
+      "capabilities": ["queue", "publish", "subscribe", "route", "persist", "cluster"],
+      "connections": ["microservice", "api", "worker"],
+      "isaContribution": {"ISA-88": 15, "ITIL": 8}
+    },
+    "worker": {
+      "name": "Background Worker",
+      "icon": "👷",
+      "colors": ["#00ff88", "#00cc66", "#009944"],
+      "shapes": ["tetrahedron", "box"],
+      "capabilities": ["process", "schedule", "batch", "cleanup", "retry", "monitor"],
+      "connections": ["queue", "database", "api"],
+      "isaContribution": {"ISA-88": 12, "ITIL": 10}
+    },
+    "plc": {
+      "name": "PLC Controller",
+      "icon": "🎛️",
+      "colors": ["#ffcc00", "#cc9900", "#996600"],
+      "shapes": ["box"],
+      "capabilities": ["scan", "logic", "io", "alarm", "program"],
+      "connections": ["hmi", "historian", "scada"],
+      "isaContribution": {"ISA-95": 25, "ISA-88": 20}
+    },
+    "hmi": {
+      "name": "HMI Screen",
+      "icon": "🖥️",
+      "colors": ["#00ccff", "#0099cc", "#006699"],
+      "shapes": ["plane"],
+      "capabilities": ["display", "control", "alarm", "trend", "navigate"],
+      "connections": ["plc", "historian", "api"],
+      "isaContribution": {"ISA-101": 30, "ISA-95": 10}
+    },
+    "historian": {
+      "name": "Data Historian",
+      "icon": "📊",
+      "colors": ["#ff6600", "#cc5200", "#993d00"],
+      "shapes": ["cylinder"],
+      "capabilities": ["store", "aggregate", "trend", "export", "compress"],
+      "connections": ["plc", "hmi", "api"],
+      "isaContribution": {"ISA-95": 20, "ISO-27001": 10}
+    }
+  },
+  "agents": {
+    "SysAdmin": {
+      "color": "#ff0000",
+      "specialty": "Database & Storage Infrastructure",
+      "autoBuildType": "database",
+      "buildRate": 0.8
+    },
+    "DevOps": {
+      "color": "#00ff00",
+      "specialty": "API Gateways & Service Mesh",
+      "autoBuildType": "api",
+      "buildRate": 0.7
+    },
+    "NetSec": {
+      "color": "#0000ff",
+      "specialty": "Security & Caching Infrastructure",
+      "autoBuildType": "cache",
+      "buildRate": 0.6
+    },
+    "DataSci": {
+      "color": "#ffff00",
+      "specialty": "Queue & Message Processing",
+      "autoBuildType": "queue",
+      "buildRate": 0.7
+    },
+    "AI-ML": {
+      "color": "#ff00ff",
+      "specialty": "Intelligent Microservices",
+      "autoBuildType": "microservice",
+      "buildRate": 0.9
+    },
+    "Cloud": {
+      "color": "#00ffff",
+      "specialty": "Worker & Batch Processing",
+      "autoBuildType": "worker",
+      "buildRate": 0.5
+    }
+  }
+}

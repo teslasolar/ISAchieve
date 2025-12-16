@@ -1,7 +1,10 @@
 {
-  "_udt": "ISAchieve/Config/West|v1.0.0|2024-12-15|DevOps|West panel config|#Config#Panel",
-  "title": "Viz",
-  "url": "html/cube-linux-isa.html",
-  "tags": ["west", "visualization"],
-  "enabled": true
+  "_udt": "ISAchieve/Index/West|v1.0.0|2024-12-16|DevOps|West dock screen|#Index#Screen#West",
+  "id": "west",
+  "title": "API",
+  "url": "api/",
+  "tags": ["west", "api", "mcp"],
+  "enabled": false,
+  "priority": 4,
+  "placeholder": "API Explorer (Coming Soon)"
 }

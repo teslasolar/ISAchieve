@@ -1,48 +1,32 @@
+<!-- UDT:ISAchieve/Root/Index|v1.0.0|2024-12-16|DevOps|Root entry point|#Root#Index#App -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ISAchieve - Dynamic Dashboard</title>
-    <link rel="stylesheet" href="styles/dashboard.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ISAchieve</title>
+  <link rel="stylesheet" href="index/styles.css">
 </head>
 <body>
-    <button class="grid-toggle" id="gridToggle">Toggle Grid Layout</button>
-    
-    <div id="app">
-        <!-- Dashboard will be mounted here -->
-    </div>
+  <div class="app-controls">
+    <button class="btn" onclick="setLayout('quad')">Quad</button>
+    <button class="btn" onclick="setLayout('single')">Single</button>
+    <button class="btn" onclick="setLayout('grid')">Grid</button>
+    <button class="btn" onclick="setLayout('stack')">Stack</button>
+  </div>
 
-    <script type="module">
-        import Dashboard from './components/organisms/Dashboard.js';
+  <div id="app"></div>
 
-        // Initialize dashboard when DOM is ready
-        let dashboard;
-        
-        async function initApp() {
-            dashboard = new Dashboard({
-                configPaths: ['center', 'north', 'east', 'south', 'west'],
-                tags: ['main-dashboard'],
-                layout: 'default'
-            });
+  <script type="module">
+    import { ISAchieveApp } from './index/app.js';
 
-            await dashboard.init();
-            
-            const app = document.getElementById('app');
-            dashboard.mount(app);
+    // Start app
+    const app = await ISAchieveApp.start('#app');
 
-            // Expose to window for console access
-            window.dashboard = dashboard;
-        }
+    // Layout controls
+    window.setLayout = (layout) => app.setLayout(layout);
 
-        document.addEventListener('DOMContentLoaded', initApp);
-
-        // Setup grid toggle
-        document.getElementById('gridToggle').addEventListener('click', () => {
-            if (window.dashboard) {
-                window.dashboard.toggleLayout();
-            }
-        });
-    </script>
+    console.log('[ISAchieve] App ready');
+  </script>
 </body>
 </html>

@@ -1,7 +1,9 @@
 {
-  "_udt": "ISAchieve/Config/East|v1.0.0|2024-12-15|DevOps|East panel config|#Config#Panel",
-  "title": "Examples",
+  "_udt": "ISAchieve/Index/East|v1.0.0|2024-12-16|DevOps|East dock screen|#Index#Screen#East",
+  "id": "east",
+  "title": "Dashboard",
   "url": "html/dashboard.html",
-  "tags": ["east", "examples"],
-  "enabled": true
+  "tags": ["east", "dashboard", "scada"],
+  "enabled": true,
+  "priority": 3
 }

@@ -1,0 +1,133 @@
+{
+  "_udt": "ISAchieve/Config/Tags|v1.0.0|2024-12-15|DataSci|Tag definitions|#Config#Tags#ISA95",
+  "provider": "default",
+  "rootPath": "ISAchieve",
+  "tagFolders": [
+    {
+      "path": "System",
+      "description": "Core system tags",
+      "tags": [
+        {"name": "Status", "type": "String", "default": "initializing"},
+        {"name": "Uptime", "type": "Int32", "default": 0, "unit": "seconds"},
+        {"name": "Version", "type": "String", "default": "1.0.0"},
+        {"name": "Mode", "type": "String", "default": "idle", "enum": ["idle", "running", "maintenance", "error"]}
+      ]
+    },
+    {
+      "path": "BlockArray/Grid",
+      "description": "3D Block Array storage",
+      "tags": [
+        {"name": "Dimensions", "type": "IntArray", "default": [100, 100, 100]},
+        {"name": "BlockSize", "type": "Int32", "default": 16},
+        {"name": "ActiveBlocks", "type": "Int32", "default": 0}
+      ]
+    },
+    {
+      "path": "Cubes",
+      "description": "Cube processing units",
+      "udtPath": "ISAchieve/UDT/Cube",
+      "dynamic": true
+    },
+    {
+      "path": "eVGPU",
+      "description": "Emulated GPU compute",
+      "tags": [
+        {"name": "Threads", "type": "Int32", "default": 4},
+        {"name": "Utilization", "type": "Float", "default": 0, "unit": "%", "max": 100},
+        {"name": "OpsPerSec", "type": "Float", "default": 0},
+        {"name": "TotalOps", "type": "Int64", "default": 0},
+        {"name": "AvgLatency", "type": "Float", "default": 0, "unit": "ms"}
+      ]
+    },
+    {
+      "path": "SCADA/PLC",
+      "description": "PLC Controllers",
+      "udtPath": "ISAchieve/UDT/PLC",
+      "dynamic": true
+    },
+    {
+      "path": "SCADA/HMI",
+      "description": "HMI Screens",
+      "tags": [
+        {"name": "ActiveScreen", "type": "String", "default": "main"},
+        {"name": "UserLevel", "type": "Int32", "default": 0}
+      ]
+    },
+    {
+      "path": "SCADA/Alarms",
+      "description": "Alarm management",
+      "tags": [
+        {"name": "ActiveCount", "type": "Int32", "default": 0},
+        {"name": "UnackedCount", "type": "Int32", "default": 0},
+        {"name": "HighestPriority", "type": "Int32", "default": 0}
+      ]
+    },
+    {
+      "path": "Historian",
+      "description": "Historical data",
+      "tags": [
+        {"name": "SampleCount", "type": "Int64", "default": 0},
+        {"name": "OldestTimestamp", "type": "DateTime", "default": null},
+        {"name": "NewestTimestamp", "type": "DateTime", "default": null},
+        {"name": "StorageUsed", "type": "Int64", "default": 0, "unit": "bytes"}
+      ]
+    },
+    {
+      "path": "Achievements",
+      "description": "ISA Achievement tracking",
+      "tags": [
+        {"name": "Points", "type": "Int32", "default": 0},
+        {"name": "Level", "type": "Int32", "default": 0},
+        {"name": "UnlockedCount", "type": "Int32", "default": 0}
+      ]
+    },
+    {
+      "path": "Performance",
+      "description": "System performance metrics",
+      "tags": [
+        {"name": "TotalThroughput", "type": "Float", "default": 0},
+        {"name": "AverageLatency", "type": "Float", "default": 0, "unit": "ms"},
+        {"name": "SystemEfficiency", "type": "Float", "default": 0, "unit": "%"},
+        {"name": "ErrorRate", "type": "Float", "default": 0, "unit": "%"},
+        {"name": "SecurityScore", "type": "Float", "default": 0, "max": 100}
+      ]
+    }
+  ],
+  "udts": {
+    "Cube": {
+      "description": "9-node cube processing unit",
+      "parameters": [
+        {"name": "Id", "type": "String"},
+        {"name": "Owner", "type": "String"}
+      ],
+      "tags": [
+        {"name": "CTR", "type": "Float", "default": 0},
+        {"name": "NEU", "type": "Float", "default": 0},
+        {"name": "NED", "type": "Float", "default": 0},
+        {"name": "NWU", "type": "Float", "default": 0},
+        {"name": "NWD", "type": "Float", "default": 0},
+        {"name": "SEU", "type": "Float", "default": 0},
+        {"name": "SED", "type": "Float", "default": 0},
+        {"name": "SWU", "type": "Float", "default": 0},
+        {"name": "SWD", "type": "Float", "default": 0},
+        {"name": "ProcessCount", "type": "Int32", "default": 0},
+        {"name": "LastProcessed", "type": "DateTime", "default": null}
+      ]
+    },
+    "PLC": {
+      "description": "PLC Controller unit",
+      "parameters": [
+        {"name": "Id", "type": "String"},
+        {"name": "Name", "type": "String"}
+      ],
+      "tags": [
+        {"name": "Status", "type": "String", "default": "stopped"},
+        {"name": "ScanRate", "type": "Int32", "default": 100, "unit": "ms"},
+        {"name": "ScanCount", "type": "Int64", "default": 0},
+        {"name": "LastScan", "type": "DateTime", "default": null},
+        {"name": "Registers", "type": "IntArray", "size": 100},
+        {"name": "Coils", "type": "BoolArray", "size": 100}
+      ]
+    }
+  }
+}

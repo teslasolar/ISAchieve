@@ -1,0 +1,44 @@
+# ISAchieve GitHub Pages Configuration
+# UDT:ISAchieve/Config/Jekyll|v1.0.0|2024-12-15|DevOps|Jekyll config|#Config#GHPages
+
+title: ISAchieve SCADA Sandbox
+description: Self-Generating SCADA System with ISA Achievement Tracking
+baseurl: "/ISAchieve"
+url: "https://teslasolar.github.io"
+
+# Theme
+remote_theme: pages-themes/hacker@v0.2.0
+
+# Plugins
+plugins:
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Include these files
+include:
+  - core
+  - compute
+  - scada
+  - viz
+  - html
+  - styles
+  - workers
+  - config
+  - _headers
+
+# Exclude from processing
+exclude:
+  - node_modules
+  - tests
+  - "*.md"
+  - package.json
+  - package-lock.json
+  - jest.config.js
+  - .eslintrc.js
+
+# Default layout
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: "default"

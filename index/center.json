@@ -1,6 +1,10 @@
 {
+  "_udt": "ISAchieve/Index/Center|v1.0.0|2024-12-16|DevOps|Center dock screen|#Index#Screen#Center",
+  "id": "center",
   "title": "Main",
   "url": "html/cube-linux-isa.html",
   "tags": ["center", "visualization", "3d", "primary", "glow", "interactive"],
-  "enabled": true
+  "enabled": true,
+  "priority": 1,
+  "size": { "minWidth": 400, "minHeight": 300 }
 }

@@ -1,0 +1,226 @@
+/* ISAchieve Dashboard Styles */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #1a1a2e;
+    color: #eee;
+    overflow: hidden;
+    height: 100vh;
+}
+
+#app {
+    width: 100%;
+    height: 100vh;
+}
+
+#dashboard {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas: 
+        "north north north"
+        "west center east"
+        "south south south";
+    gap: 10px;
+    padding: 10px;
+    height: 100vh;
+}
+
+/* Screen Container */
+.screen-container {
+    position: relative;
+    background: #16213e;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid #0f3460;
+    transition: all 0.3s ease;
+}
+
+.screen-container:hover {
+    border-color: #667eea;
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+}
+
+/* Tag-based positioning */
+.tag-north { grid-area: north; }
+.tag-east { grid-area: east; }
+.tag-south { grid-area: south; }
+.tag-west { grid-area: west; }
+.tag-center { 
+    grid-area: center;
+}
+
+/* Tag-based visual styles */
+.tag-primary {
+    border: 3px solid #667eea !important;
+    box-shadow: 0 0 30px rgba(102, 126, 234, 0.5) !important;
+}
+
+.tag-glow {
+    box-shadow: 0 0 40px rgba(102, 126, 234, 0.6) !important;
+    border: 3px solid #667eea !important;
+}
+
+.tag-visualization {
+    background: #000000;
+}
+
+.tag-docs {
+    background: #ffffff;
+}
+
+.tag-pulsing {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+/* Screen Header */
+.screen-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #0f3460;
+}
+
+.screen-title {
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: white;
+}
+
+.screen-tags {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.tag {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 500;
+    color: white;
+}
+
+/* Tag-specific badge colors */
+.tag[data-tag-type="primary"] {
+    background: rgba(102, 126, 234, 0.8);
+}
+
+.tag[data-tag-type="live"] {
+    background: rgba(255, 107, 107, 0.8);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.tag[data-tag-type="interactive"] {
+    background: rgba(76, 209, 55, 0.8);
+}
+
+.tag[data-tag-type="visualization"] {
+    background: rgba(138, 43, 226, 0.8);
+}
+
+/* Screen Content */
+.screen-content {
+    height: calc(100% - 42px);
+    position: relative;
+}
+
+.screen-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: white;
+}
+
+.loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #eee;
+}
+
+.spinner {
+    border: 3px solid #0f3460;
+    border-top: 3px solid #667eea;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-message {
+    color: #ff6b6b;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Grid Toggle Button */
+.grid-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    z-index: 1000;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+}
+
+.grid-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Alternate grid layout */
+#dashboard.grid-4x4 {
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    grid-template-areas: none;
+}
+
+#dashboard.grid-4x4 .screen-container {
+    grid-area: auto !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #dashboard {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        grid-template-areas: 
+            "north"
+            "center"
+            "west"
+            "east"
+            "south";
+    }
+}

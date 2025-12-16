@@ -1,0 +1,79 @@
+# Konomi ISAchieve MCP Server Configuration
+
+# MCP Server Settings
+mcp:
+  name: "konomi-isachieve"
+  version: "1.0.0"
+  description: "Model Context Protocol server for Konomi ISAchieve CLI"
+
+# Tools exposed via MCP
+tools:
+  - name: "achieve_list"
+    description: "List all achievements for an agent"
+    command: "konomi achieve list"
+    enabled: true
+    timeout: 5000
+    parameters:
+      agentId:
+        type: "string"
+        description: "Agent ID to list achievements for"
+    required: []
+
+  - name: "achieve_unlock"
+    description: "Unlock an achievement"
+    command: "konomi achieve unlock {achievementId} --tags {tags}"
+    enabled: true
+    timeout: 5000
+    parameters:
+      achievementId:
+        type: "string"
+        description: "Achievement identifier"
+      tags:
+        type: "string"
+        description: "Comma-separated tags"
+    required:
+      - achievementId
+
+  - name: "dashboard_start"
+    description: "Start the dashboard server"
+    command: "konomi dashboard start --port {port}"
+    enabled: true
+    timeout: 10000
+    parameters:
+      port:
+        type: "string"
+        description: "Port number"
+        default: "8080"
+    required: []
+
+  - name: "config_show"
+    description: "Show configuration"
+    command: "konomi config show {key}"
+    enabled: true
+    timeout: 3000
+    parameters:
+      key:
+        type: "string"
+        description: "Configuration key"
+    required: []
+
+  - name: "execute_custom"
+    description: "Execute a custom shell command"
+    command: "{command}"
+    enabled: false  # Disabled by default for security
+    timeout: 30000
+    parameters:
+      command:
+        type: "string"
+        description: "Shell command to execute"
+    required:
+      - command
+
+# Security settings
+security:
+  allowCustomCommands: false
+  whitelistedCommands:
+    - "konomi"
+    - "git"
+    - "npm"
+  maxExecutionTime: 120000

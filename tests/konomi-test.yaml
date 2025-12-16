@@ -1,0 +1,136 @@
+# Konomi ISAchieve Test Configuration
+
+# API Test Configuration
+api:
+  baseUrl: http://localhost:3000
+  timeout: 5000
+  retries: 3
+  endpoints:
+    - path: /api/health
+      method: GET
+      expect:
+        status: 200
+        body:
+          status: ok
+    
+    - path: /api/commands
+      method: GET
+      expect:
+        status: 200
+        body:
+          commands: array
+    
+    - path: /api/execute
+      method: POST
+      body:
+        command: version
+      expect:
+        status: 200
+        body:
+          success: true
+
+# MCP Test Configuration
+mcp:
+  baseUrl: http://localhost:3001
+  timeout: 5000
+  tools:
+    - name: konomi_version
+      args: {}
+      expect:
+        success: true
+    
+    - name: konomi_execute
+      args:
+        command: help
+      expect:
+        success: true
+    
+    - name: konomi_list_commands
+      args: {}
+      expect:
+        result:
+          commands: array
+
+# CLI Test Configuration
+cli:
+  binary: node cli/konomi.js
+  timeout: 3000
+  commands:
+    - cmd: version
+      expect:
+        output: "Konomi ISAchieve"
+        exitCode: 0
+    
+    - cmd: help
+      expect:
+        output: "Usage:"
+        exitCode: 0
+    
+    - cmd: list
+      expect:
+        exitCode: 0
+    
+    - cmd: config show
+      expect:
+        exitCode: 0
+
+# Deployment Test Configuration
+deployment:
+  url: https://teslasolar.github.io/ISAchieve
+  timeout: 10000
+  checks:
+    - path: /
+      expect:
+        status: 200
+        contains: "ISAchieve"
+    
+    - path: /index.html
+      expect:
+        status: 200
+    
+    - path: /components/organisms/Dashboard.js
+      expect:
+        status: 200
+        contentType: text/javascript
+    
+    - path: /styles/dashboard.css
+      expect:
+        status: 200
+        contentType: text/css
+
+# Performance Tests
+performance:
+  api:
+    maxResponseTime: 200
+    concurrentRequests: 10
+  
+  mcp:
+    maxResponseTime: 500
+    
+  cli:
+    maxExecutionTime: 1000
+
+# Integration Tests
+integration:
+  scenarios:
+    - name: "Full workflow test"
+      steps:
+        - type: cli
+          command: version
+        - type: api
+          endpoint: /api/health
+        - type: mcp
+          tool: konomi_version
+    
+    - name: "Command execution test"
+      steps:
+        - type: cli
+          command: list
+        - type: api
+          endpoint: /api/execute
+          body:
+            command: version
+        - type: mcp
+          tool: konomi_execute
+          args:
+            command: help
