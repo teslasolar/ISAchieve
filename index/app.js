@@ -1,9 +1,11 @@
-/* UDT:ISAchieve/Index/App|v1.1.0|2024-12-16|DevOps|Self-generating app controller|#Index#App#Agents */
+/* UDT:ISAchieve/Index/App|v1.2.0|2024-12-16|DevOps|Self-generating ERP/SCADA app|#Index#App#Agents#ERP#SCADA */
 
 /**
- * ISAchieve App Controller - Self-Generating Edition
- * Agents dynamically create and manage screens/components
+ * ISAchieve App Controller - Self-Generating ERP/SCADA Edition
+ * Agents dynamically create enterprise and industrial components
  */
+
+import ERPSCADASystem from '../scada/erp.js';
 
 // Agent definitions - each agent manages different aspects
 const AGENTS = {
@@ -21,7 +23,14 @@ const COMPONENTS = {
   status: (app, container) => app.createStatusPanel(container),
   agents: (app, container) => app.createAgentPanel(container),
   metrics: (app, container) => app.createMetricsPanel(container),
-  cube: (app, container) => app.createCubeViz(container)
+  cube: (app, container) => app.createCubeViz(container),
+  // ERP/SCADA components
+  erp: (app, container) => app.createERPBrowser(container),
+  inventory: (app, container) => app.erp?.createComponent('erp.inventory', container),
+  production: (app, container) => app.erp?.createComponent('erp.production', container),
+  alarms: (app, container) => app.erp?.createComponent('scada.alarms', container),
+  historian: (app, container) => app.erp?.createComponent('scada.historian', container),
+  hmi: (app, container) => app.erp?.createComponent('scada.hmi', container)
 };
 
 export class ISAchieveApp {
@@ -33,7 +42,8 @@ export class ISAchieveApp {
     this.container = null;
     this.initialized = false;
     this.generatedComponents = [];
-    this.stats = { uptime: 0, generated: 0, agents: 0 };
+    this.stats = { uptime: 0, generated: 0, agents: 0, erpModules: 0, scadaModules: 0 };
+    this.erp = null; // ERP/SCADA system
   }
 
   // Initialize agents
@@ -222,6 +232,8 @@ export class ISAchieveApp {
           <div class="status-row"><span>Agents</span><span>${this.stats.agents}</span></div>
           <div class="status-row"><span>Generated</span><span>${this.stats.generated}</span></div>
           <div class="status-row"><span>Screens</span><span>${this.screens.size}</span></div>
+          <div class="status-row"><span>ERP Modules</span><span>${this.stats.erpModules}</span></div>
+          <div class="status-row"><span>SCADA Modules</span><span>${this.stats.scadaModules}</span></div>
         `;
       }
     };
@@ -267,6 +279,38 @@ export class ISAchieveApp {
     container.innerHTML = `<div class="cube-mini">🧊 Cube Viz</div>`;
   }
 
+  // ERP/SCADA Module Browser
+  createERPBrowser(container) {
+    if (!this.erp) return;
+
+    const modules = this.erp.getModuleList();
+    container.innerHTML = `
+      <div class="module-browser">
+        <div class="module-browser-header">ERP/SCADA Modules</div>
+        <div class="module-list">
+          ${modules.map(mod => `
+            <div class="module-item" data-module="${mod.id}">
+              <span class="module-icon">${mod.icon}</span>
+              <span class="module-name">${mod.name}</span>
+              <span class="module-type ${mod.type}">${mod.type}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+    // Click to spawn module
+    container.querySelectorAll('.module-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const moduleId = item.dataset.module;
+        const mod = this.erp.spawn(moduleId, 'browser');
+        if (mod) {
+          this.log(`Spawned ${mod.name} via ${mod.agent}`);
+        }
+      });
+    });
+  }
+
   // Execute terminal command
   exec(cmd) {
     this.log(`> ${cmd}`);
@@ -274,7 +318,10 @@ export class ISAchieveApp {
 
     switch (command) {
       case 'help':
-        this.log('agents | spawn <agent> <type> | screens | layout <type> | stats | clear');
+        this.log('Commands: agents | spawn | screens | layout | stats | erp | scada | clear');
+        this.log('  spawn <agent> <type> - Agent spawns component');
+        this.log('  erp [module] - List or spawn ERP module');
+        this.log('  scada [module] - List or spawn SCADA module');
         break;
       case 'agents':
         this.agents.forEach(a => this.log(`  ${a.name}: ${a.spawned} spawned [${a.specialty}]`));
@@ -287,6 +334,30 @@ export class ISAchieveApp {
           this.log('Usage: spawn <agent> <type>');
         }
         break;
+      case 'erp':
+        if (!this.erp) { this.log('ERP system not initialized'); break; }
+        if (args[0]) {
+          const mod = this.erp.spawn(`erp.${args[0]}`, 'terminal');
+          mod ? this.log(`Spawned ${mod.name}`) : this.log(`Unknown module: ${args[0]}`);
+        } else {
+          this.log('ERP Modules:');
+          this.erp.getModuleList().filter(m => m.type === 'erp').forEach(m =>
+            this.log(`  ${m.id.replace('erp.', '')}: ${m.icon} ${m.name}`)
+          );
+        }
+        break;
+      case 'scada':
+        if (!this.erp) { this.log('SCADA system not initialized'); break; }
+        if (args[0]) {
+          const mod = this.erp.spawn(`scada.${args[0]}`, 'terminal');
+          mod ? this.log(`Spawned ${mod.name}`) : this.log(`Unknown module: ${args[0]}`);
+        } else {
+          this.log('SCADA Modules:');
+          this.erp.getModuleList().filter(m => m.type === 'scada').forEach(m =>
+            this.log(`  ${m.id.replace('scada.', '')}: ${m.icon} ${m.name}`)
+          );
+        }
+        break;
       case 'screens':
         this.screens.forEach((s, id) => this.log(`  ${id}: ${s.title} ${s._generated ? '[gen]' : ''}`));
         break;
@@ -295,12 +366,16 @@ export class ISAchieveApp {
         break;
       case 'stats':
         this.log(`Uptime: ${this.stats.uptime}s | Agents: ${this.stats.agents} | Generated: ${this.stats.generated}`);
+        if (this.erp) {
+          const mods = this.erp.getModuleList();
+          this.log(`ERP: ${mods.filter(m => m.type === 'erp').length} | SCADA: ${mods.filter(m => m.type === 'scada').length}`);
+        }
         break;
       case 'clear':
         document.querySelector('#term-out').innerHTML = '';
         break;
       default:
-        this.log(`? ${command}`);
+        this.log(`? ${command} (type 'help' for commands)`);
     }
   }
 
@@ -380,8 +455,18 @@ export class ISAchieveApp {
     await this.loadConfig();
     await this.generateScreens();
 
+    // Initialize ERP/SCADA system
+    this.erp = new ERPSCADASystem(this);
+    await this.erp.init();
+    this.erp.startSimulation();
+
+    // Count modules
+    const mods = this.erp.getModuleList();
+    this.stats.erpModules = mods.filter(m => m.type === 'erp').length;
+    this.stats.scadaModules = mods.filter(m => m.type === 'scada').length;
+
     this.initialized = true;
-    console.log(`[ISA] Self-Gen App initialized: ${this.screens.size} screens, ${this.agents.size} agents`);
+    console.log(`[ISA] Self-Gen ERP/SCADA App initialized: ${this.screens.size} screens, ${this.agents.size} agents, ${mods.length} modules`);
 
     return this;
   }

@@ -1,10 +1,10 @@
 {
-  "_udt": "ISAchieve/Index/West|v1.0.0|2024-12-16|DevOps|West dock screen|#Index#Screen#West",
+  "_udt": "ISAchieve/Index/West|v1.1.0|2024-12-16|DevOps|West dock screen with ERP/SCADA|#Index#Screen#West#ERP",
   "id": "west",
-  "title": "API",
-  "url": "api/",
-  "tags": ["west", "api", "mcp"],
-  "enabled": false,
+  "title": "ERP/SCADA",
+  "url": null,
+  "tags": ["west", "erp", "scada", "modules"],
+  "enabled": true,
   "priority": 4,
-  "placeholder": "API Explorer (Coming Soon)"
+  "component": "erp"
 }
