@@ -221,6 +221,52 @@ body {
   color: #fff;
 }
 
+/* Terminal Component */
+.terminal-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #000;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 11px;
+  color: var(--accent-green);
+}
+
+.terminal-output {
+  flex: 1;
+  padding: 8px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+.terminal-input-row {
+  display: flex;
+  align-items: center;
+  padding: 6px 8px;
+  background: #111;
+  border-top: 1px solid #333;
+}
+
+.term-prompt {
+  color: var(--accent-blue);
+  margin-right: 6px;
+}
+
+.term-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--accent-green);
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+}
+
+.screen-loading.placeholder {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   [data-layout="quad"] .dock-container {

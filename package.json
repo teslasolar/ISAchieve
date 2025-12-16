@@ -18,7 +18,10 @@
     "start": "node examples/basic-usage.js",
     "start:api": "node api/server.js",
     "start:mcp": "node api/mcp-server.js",
-    "dev": "node --watch examples/basic-usage.js"
+    "dev": "node --watch examples/basic-usage.js",
+    "konomi": "node cli/konomi.js",
+    "konomi:repl": "node cli/repl.js",
+    "konomi:examples": "node cli/examples.js"
   },
   "keywords": [
     "ai",
